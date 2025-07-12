@@ -6,6 +6,10 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
+<p align="center">
+  <img src="https://i.imgur.com/Ut5f5Qp.gif" alt="BlogTubeAI Demo" width="700"/>
+</p>
+
 ## 📋 Overview
 
 BlogTubeAI is an intelligent tool that converts YouTube video content into well-structured blog posts using advanced AI language models. It automatically extracts video transcripts, processes them through your choice of AI providers, and generates engaging, publication-ready blog content.
@@ -40,38 +44,32 @@ BlogTubeAI is an intelligent tool that converts YouTube video content into well-
 | **Environment** | python-dotenv | Configuration management |
 | **HTTP** | requests + urllib3 | API communications |
 
-## 🚀 Quick Start
+## 🚀 Getting Started
 
 ### Prerequisites
 
 - Python 3.8 or higher
+- Make (for simplified workflow)
 - At least one AI provider API key
 - Internet connection for YouTube access
 
-### 1. Installation
+### 1. Quick Setup
 
 ```bash
 # Clone the repository
 git clone https://github.com/yourusername/BlogTubeAI.git
 cd BlogTubeAI
 
-# Create and activate virtual environment
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
+# One-command setup (installs dependencies, creates directories, and .env template)
+make setup
 ```
 
 ### 2. Configuration
 
-Create your environment configuration:
+After running `make setup`, configure your API keys:
 
 ```bash
-# Copy example environment file
-cp .env.example .env
-
-# Edit with your API keys
+# Edit the generated .env file with your API keys
 nano .env
 ```
 
@@ -85,20 +83,64 @@ AZURE_OPENAI_API_KEY=your-azure-key-here
 AZURE_OPENAI_ENDPOINT=https://your-resource.openai.azure.com/
 ```
 
-### 3. Basic Usage
+### 3. Verify Setup
 
 ```bash
-# Convert any YouTube video to a blog post
-python main.py "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+# Check that everything is configured correctly
+make check-env
 
-# Interactive mode for guided experience
-python main.py --interactive
+# Run a quick health check
+make doctor
 ```
 
-## 📖 Detailed Usage Guide
+### 4. Basic Usage
+
+```bash
+# Start interactive mode for guided experience
+make run
+
+# Quick demo with a sample video
+make demo
+
+# Run with an example TED Talk
+make example
+```
+
+## 📖 Usage
+
+### Make Commands Overview
+
+BlogTubeAI includes a comprehensive Makefile for streamlined development and usage:
+
+```bash
+# Get help with all available commands
+make help
+
+# Setup & Installation
+make setup           # Complete development setup
+make install         # Install production dependencies only
+make dev-install     # Install development dependencies
+
+# Application Usage
+make run             # Start interactive mode
+make demo            # Quick demo with sample video
+make example         # Run with example TED Talk
+
+# Development
+make test            # Run all tests
+make format          # Format code with black
+make lint            # Run linter
+make check-all       # Run all code quality checks
+
+# Maintenance
+make clean           # Remove cache files
+make logs            # View recent logs
+make version         # Show version info
+```
 
 ### Command Line Options
 
+For direct Python usage:
 ```bash
 python main.py [URL] [OPTIONS]
 
@@ -117,7 +159,10 @@ Options:
 
 **1. Educational Content Processing:**
 ```bash
-# Convert a lecture to a study guide
+# Interactive mode - recommended for beginners
+make run
+
+# Direct command line usage
 python main.py "https://youtu.be/lecture-video-id" \
   --language en \
   --provider openai \
@@ -169,7 +214,7 @@ The interactive mode provides:
 
 ```bash
 # Start interactive session
-python main.py -i
+make run
 
 # Example interactive session:
 🎬 YouTube to Blog Converter
@@ -192,12 +237,12 @@ Select language code [en]: en
 
 Available LLM Providers:
 ┌─────────────┬─────────────────────┐
-│ Provider    │ Description         │
+│ Provider    │ Description         |
 ├─────────────┼─────────────────────┤
-│ openai      │ OpenAI GPT models   │
-│ claude      │ Anthropic Claude    │
-│ gemini      │ Google Gemini       │
-│ azureopenai │ Azure OpenAI        │
+│ openai      │ OpenAI GPT models   |
+│ claude      │ Anthropic Claude    |
+│ gemini      │ Google Gemini       |
+│ azureopenai │ Azure OpenAI        |
 └─────────────┴─────────────────────┘
 
 Select LLM provider [openai]: claude
@@ -208,6 +253,7 @@ Select LLM provider [openai]: claude
 ```
 BlogTubeAI/
 ├── 📄 main.py                    # Main application entry point
+├── 📄 Makefile                   # Development workflow automation
 ├── 📁 src/                       # Core application modules
 │   ├── 🔗 youtube_parser.py      # URL parsing and video ID extraction
 │   ├── 📝 transcript_handler.py  # Transcript fetching and processing
@@ -220,7 +266,7 @@ BlogTubeAI/
 │   ├── 🧪 test_llm_providers.py
 │   ├── 🧪 test_blog_formatter.py
 │   ├── 🧪 test_utils.py
-│   ├── 🧪 test_integration.py
+│   ├── 🧪 test_main.py
 │   └── ⚙️ conftest.py
 ├── 📁 output/                    # Generated blog posts
 ├── 📁 logs/                      # Application logs
@@ -230,45 +276,62 @@ BlogTubeAI/
 └── 📖 README.md                 # This file
 ```
 
-## 🧪 Testing & Development
-
-### Running Tests
-
-```bash
-# Install development dependencies
-pip install -r requirements-dev.txt
-
-# Run all tests
-pytest
-
-# Run with coverage report
-pytest --cov=src tests/
-
-# Run specific test categories
-pytest tests/test_youtube_parser.py  # Unit tests
-pytest tests/test_integration.py    # Integration tests
-
-# Run with verbose output
-pytest -v tests/
-```
+## 🧪 Development
 
 ### Development Workflow
 
 ```bash
-# Install development tools
-pip install -r requirements-dev.in
+# Complete development setup
+make dev
 
-# Code formatting
-black src/ tests/
+# Run tests before making changes
+make test
 
-# Linting
-flake8 src/ tests/
+# Format and lint your code
+make format
+make lint
 
-# Type checking
-mypy src/
+# Run all quality checks
+make check-all
 
-# Run complete check
-pytest --cov=src tests/ && black --check src/ && flake8 src/
+# Pre-commit checks
+make precommit
+```
+
+### Running Tests
+
+```bash
+# Run all tests
+make test
+
+# Run with coverage report
+make test-coverage
+
+# Generate HTML coverage report
+make test-html
+
+# Run specific test categories
+make test-unit          # Unit tests only
+make test-integration   # Integration tests only
+
+# Run tests in watch mode (requires pytest-watch)
+make test-watch
+```
+
+### Dependency Management
+
+```bash
+# Add a new production dependency
+make add-dep PACKAGE=package-name
+
+# Add a new development dependency  
+make add-dev-dep PACKAGE=package-name
+
+# Upgrade all dependencies
+make upgrade-deps
+
+# Sync environment with requirements
+make sync
 ```
 
 ### Test Coverage Goals
@@ -339,18 +402,35 @@ output/
 
 ## 🔧 Troubleshooting
 
+### Quick Diagnostics
+
+```bash
+# Check environment and configuration
+make check-env
+
+# Run comprehensive health check
+make doctor
+
+# View recent application logs
+make logs
+
+# Check version and system info
+make version
+```
+
 ### Common Issues & Solutions
 
 **❌ "No transcripts available"**
 ```bash
 # Some videos don't have transcripts - check video settings
 # Try a different video or check if captions are enabled
+make demo  # Test with a known working video
 ```
 
 **❌ "Invalid API key"** 
 ```bash
-# Verify your .env file has correct API keys
-cat .env | grep API_KEY
+# Verify your .env file configuration
+make check-env
 
 # Test API key validity
 python -c "import openai; print('OpenAI key valid')"
@@ -358,8 +438,8 @@ python -c "import openai; print('OpenAI key valid')"
 
 **❌ "Permission denied writing file"**
 ```bash
-# Ensure output directory permissions
-mkdir -p output && chmod 755 output
+# Ensure output directory exists and has proper permissions
+make create-dirs
 
 # Or specify different output location
 python main.py "URL" --output ~/Documents/blog.md
@@ -375,28 +455,21 @@ python main.py "URL" --provider claude  # Try different provider
 ```bash
 # Check if video is public and accessible
 # Some videos are region-locked or private
+make example  # Test with a known working example
 ```
 
-### Debug Mode
+### Development Issues
 
 ```bash
-# Enable detailed logging
-export PYTHONPATH="${PYTHONPATH}:$(pwd)"
-python main.py "URL" --interactive  # More verbose output
+# Clean and reset environment
+make clean-all
+make dev-install
 
-# Check logs for detailed error information
-tail -f logs/youtube-blog-converter_$(date +%Y-%m-%d).log
-```
+# Check code quality issues
+make check-all
 
-### Performance Issues
-
-```bash
-# Profile memory usage
-pip install memory-profiler
-python -m memory_profiler main.py "URL"
-
-# Time operations
-time python main.py "URL"
+# Reset to fresh state
+make reset
 ```
 
 ## 🌟 Advanced Features
@@ -444,23 +517,31 @@ def process_youtube_webhook():
 - 📊 **v2.4** - Analytics and content insights
 - 🔗 **v2.5** - CMS integration (WordPress, Ghost)
 
-### Contributing
+## 🤝 Contributing
 
-We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+We welcome contributions! Here's how to get started:
 
 ```bash
-# Development setup
+# Fork and clone the repository
 git clone https://github.com/yourusername/BlogTubeAI.git
 cd BlogTubeAI
-pip install -r requirements-dev.in
-pytest  # Run tests before contributing
+
+# Setup development environment
+make dev
+
+# Make your changes and test
+make precommit
+
+# Submit a pull request
 ```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🤝 Support
+## 📧 Contact
 
 - 📧 **Email:** support@BlogTubeAI.com
 - 💬 **Discord:** [BlogTubeAI Community](https://discord.gg/BlogTubeAI)

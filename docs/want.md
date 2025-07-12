@@ -1,0 +1,2 @@
+- use langgraph canvas editor
+- apply the deep research
