@@ -1,444 +1,486 @@
-# YouTube to Blog Converter
+# 🎬 BlogTubeAI - YouTube to Blog Converter
 
-Transform YouTube videos into well-formatted blog posts using AI-powered transcription and content generation.
+> Transform YouTube videos into engaging, AI-powered blog posts with intelligent content generation and multi-language support.
+
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 ## 📋 Overview
 
-This tool automates the process of converting YouTube video content into engaging blog posts by:
+BlogTubeAI is an intelligent tool that converts YouTube video content into well-structured blog posts using advanced AI language models. It automatically extracts video transcripts, processes them through your choice of AI providers, and generates engaging, publication-ready blog content.
 
-1. **Extracting video ID** from YouTube URL
-2. **Fetching available transcript languages** 
-3. **Allowing language selection** for transcripts
-4. **Downloading video transcript** 
-5. **Processing content with LLM** for blog generation
-6. **Outputting formatted Markdown** blog post
+### 🎯 Perfect For
 
-## 🚀 Features
+- **Content Creators** - Repurpose video content into blog posts
+- **Marketers** - Create written content from webinars and presentations  
+- **Educators** - Transform lecture videos into study materials
+- **Bloggers** - Generate content from interview videos
+- **Researchers** - Convert conference talks into readable articles
 
-- Support for multiple transcript languages
-- Interactive CLI interface
-- Multiple LLM provider support (OpenAI, Claude, Gemini)
-- Customizable blog formatting
-- Markdown output with proper structure
-- Error handling for private/unavailable videos
+## ✨ Key Features
+
+- 🌍 **Multi-language Support** - Extract transcripts in 50+ languages
+- 🤖 **Multiple AI Providers** - OpenAI GPT, Anthropic Claude, Google Gemini, Azure OpenAI
+- 🎨 **Smart Formatting** - Professional Markdown output with proper structure
+- 💬 **Interactive CLI** - User-friendly command-line interface with Rich UI
+- 📁 **Organized Output** - Automatic file naming and directory management
+- 🔍 **Comprehensive Logging** - Daily log files for debugging and monitoring
+- ⚡ **Error Handling** - Robust error management for private/unavailable videos
+- 🔄 **Batch Processing** - Process multiple videos efficiently
 
 ## 🛠️ Tech Stack
 
-- **Python 3.8+** - Core language
-- **youtube-transcript-api** - YouTube transcript extraction
-- **openai** - OpenAI GPT integration
-- **anthropic** - Claude AI integration (optional)
-- **google-generativeai** - Gemini AI integration (optional)
-- **rich** - Enhanced CLI interface and formatting
-- **click** - Command-line interface framework
-- **requests** - HTTP requests handling
-- **python-dotenv** - Environment variable management
+| Component | Technology | Purpose |
+|-----------|------------|---------|
+| **Core** | Python 3.8+ | Main application framework |
+| **Transcripts** | youtube-transcript-api | YouTube transcript extraction |
+| **AI Models** | OpenAI, Anthropic, Google | Content generation |
+| **CLI Interface** | Rich + Click | Enhanced user experience |
+| **Environment** | python-dotenv | Configuration management |
+| **HTTP** | requests + urllib3 | API communications |
 
-## 📦 Installation
-
-1. **Clone the repository:**
-   ```bash
-   git clone <repository-url>
-   cd youtube-tool
-   ```
-
-2. **Create virtual environment:**
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
-
-3. **Install dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Set up environment variables:**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your API keys
-   ```
-
-## ⚙️ Configuration
-
-Create a `.env` file with your LLM API credentials:
-
-```env
-OPENAI_API_KEY=your_openai_key_here
-ANTHROPIC_API_KEY=your_claude_key_here
-GOOGLE_API_KEY=your_gemini_key_here
-```
-
-## 🎯 Usage
+## 🚀 Quick Start
 
 ### Prerequisites
+
 - Python 3.8 or higher
-- At least one LLM API key (OpenAI, Anthropic, or Google)
-- Internet connection for YouTube API access
+- At least one AI provider API key
+- Internet connection for YouTube access
 
-### Basic Usage
+### 1. Installation
+
 ```bash
-# Convert a YouTube video to blog post
-python main.py https://www.youtube.com/watch?v=dQw4w9WgXcQ
+# Clone the repository
+git clone https://github.com/yourusername/BlogTubeAI.git
+cd BlogTubeAI
 
-# Specify language and provider
-python main.py https://www.youtube.com/watch?v=dQw4w9WgXcQ --language en --provider openai
+# Create and activate virtual environment
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
 
-# Save to specific file
-python main.py https://www.youtube.com/watch?v=dQw4w9WgXcQ --output my_blog_post.md
+# Install dependencies
+pip install -r requirements.txt
 ```
 
-### Interactive Mode
+### 2. Configuration
+
+Create your environment configuration:
+
 ```bash
-# Start interactive session
+# Copy example environment file
+cp .env.example .env
+
+# Edit with your API keys
+nano .env
+```
+
+Required environment variables:
+```env
+# Choose at least one provider
+OPENAI_API_KEY=sk-your-openai-key-here
+ANTHROPIC_API_KEY=sk-ant-your-claude-key-here
+GOOGLE_API_KEY=your-gemini-key-here
+AZURE_OPENAI_API_KEY=your-azure-key-here
+AZURE_OPENAI_ENDPOINT=https://your-resource.openai.azure.com/
+```
+
+### 3. Basic Usage
+
+```bash
+# Convert any YouTube video to a blog post
+python main.py "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+
+# Interactive mode for guided experience
 python main.py --interactive
-
-# Or simply run without URL
-python main.py
 ```
+
+## 📖 Detailed Usage Guide
 
 ### Command Line Options
+
 ```bash
 python main.py [URL] [OPTIONS]
 
+Arguments:
+  URL                     YouTube video URL (optional in interactive mode)
+
 Options:
-  -l, --language TEXT     Transcript language code (en, es, fr, etc.)
-  -p, --provider TEXT     LLM provider: openai, claude, gemini [default: openai]
-  -o, --output TEXT       Output file path
-  -i, --interactive       Start interactive mode
-  --help                  Show help message
+  -l, --language TEXT     Transcript language (en, es, fr, de, etc.)
+  -p, --provider CHOICE   AI provider [openai|claude|gemini|azureopenai]
+  -o, --output PATH       Custom output file path
+  -i, --interactive       Enable interactive mode
+  --help                  Show help message and exit
 ```
 
-### Example Workflows
+### Real-World Examples
 
-**1. Quick Blog Generation:**
+**1. Educational Content Processing:**
 ```bash
-# One-line conversion with defaults
-python main.py "https://youtu.be/dQw4w9WgXcQ"
+# Convert a lecture to a study guide
+python main.py "https://youtu.be/lecture-video-id" \
+  --language en \
+  --provider openai \
+  --output "study-guides/physics-101-lecture-5.md"
 ```
 
-**2. Spanish Content:**
+**2. Multi-language Content:**
 ```bash
-# Extract Spanish transcript and generate blog
-python main.py "https://youtu.be/dQw4w9WgXcQ" --language es --provider claude
+# Process Spanish educational content
+python main.py "https://youtu.be/spanish-video" \
+  --language es \
+  --provider claude
 ```
 
-**3. Batch Processing:**
+**3. Conference Talk Processing:**
 ```bash
-# Process multiple videos (create a script)
+# Convert tech conference presentation
+python main.py "https://youtu.be/tech-talk" \
+  --provider gemini \
+  --output "conference-notes/ai-trends-2024.md"
+```
+
+**4. Batch Processing Script:**
+```bash
 #!/bin/bash
-urls=(
+# process_videos.sh - Batch convert multiple videos
+
+videos=(
     "https://youtu.be/video1"
-    "https://youtu.be/video2"
+    "https://youtu.be/video2" 
     "https://youtu.be/video3"
 )
 
-for url in "${urls[@]}"; do
-    python main.py "$url" --provider openai
+for video in "${videos[@]}"; do
+    echo "Processing: $video"
+    python main.py "$video" --provider openai
+    sleep 5  # Rate limiting
 done
 ```
 
-**4. Custom Output Directory:**
-```bash
-# Save to specific directory
-mkdir -p output/blogs
-python main.py "https://youtu.be/dQw4w9WgXcQ" --output output/blogs/my_blog.md
-```
+### Interactive Mode Features
 
-### Expected Output
-When successful, you'll see:
-```
+The interactive mode provides:
+- ✅ URL validation and video preview
+- 🌐 Language selection from available options
+- 🤖 AI provider comparison and selection
+- 📁 Custom output path specification
+- 👀 Blog preview before saving
+
+```bash
+# Start interactive session
+python main.py -i
+
+# Example interactive session:
 🎬 YouTube to Blog Converter
 Transform videos into engaging blog posts!
 
-✅ Video ID extracted: dQw4w9WgXcQ
-📹 Video: Rick Astley - Never Gonna Give You Up (Official Video)
-🔍 Fetching available transcript languages...
+Enter YouTube URL: https://youtu.be/example
+✅ Video ID extracted: example
+📹 Video: Amazing Tutorial Video
 
-Available Transcript Languages
+Available Transcript Languages:
 ┌──────┬─────────┐
 │ Code │ Language│
 ├──────┼─────────┤
 │ en   │ English │
 │ es   │ Spanish │
+│ fr   │ French  │
 └──────┴─────────┘
 
-📝 Fetching transcript in 'en'...
-✅ Transcript fetched (2847 characters)
-🤖 Generating blog using openai...
-🎉 Blog saved successfully to: rick_astley_never_gonna_give_you_up_official_video_dQw4w9WgXcQ.md
+Select language code [en]: en
+
+Available LLM Providers:
+┌─────────────┬─────────────────────┐
+│ Provider    │ Description         │
+├─────────────┼─────────────────────┤
+│ openai      │ OpenAI GPT models   │
+│ claude      │ Anthropic Claude    │
+│ gemini      │ Google Gemini       │
+│ azureopenai │ Azure OpenAI        │
+└─────────────┴─────────────────────┘
+
+Select LLM provider [openai]: claude
 ```
 
-## 🧪 Testing
+## 📁 Project Structure
 
-### Test Structure
 ```
-tests/
-├── __init__.py
-├── test_youtube_parser.py      # URL parsing and video ID extraction
-├── test_transcript_handler.py  # Transcript fetching and processing
-├── test_llm_providers.py       # LLM integration (mocked)
-├── test_blog_formatter.py      # Markdown formatting and file I/O
-├── test_utils.py               # Utility functions
-├── test_integration.py         # End-to-end workflow tests
-└── conftest.py                 # Test configuration and fixtures
+BlogTubeAI/
+├── 📄 main.py                    # Main application entry point
+├── 📁 src/                       # Core application modules
+│   ├── 🔗 youtube_parser.py      # URL parsing and video ID extraction
+│   ├── 📝 transcript_handler.py  # Transcript fetching and processing
+│   ├── 🤖 llm_providers.py       # AI provider integrations
+│   ├── 📰 blog_formatter.py      # Markdown formatting and output
+│   └── 🛠️ utils.py               # Utility functions and helpers
+├── 📁 tests/                     # Comprehensive test suite
+│   ├── 🧪 test_youtube_parser.py
+│   ├── 🧪 test_transcript_handler.py
+│   ├── 🧪 test_llm_providers.py
+│   ├── 🧪 test_blog_formatter.py
+│   ├── 🧪 test_utils.py
+│   ├── 🧪 test_integration.py
+│   └── ⚙️ conftest.py
+├── 📁 output/                    # Generated blog posts
+├── 📁 logs/                      # Application logs
+├── 📄 requirements.in            # Core dependencies
+├── 📄 requirements-dev.in        # Development dependencies
+├── 📄 .env.example              # Environment template
+└── 📖 README.md                 # This file
 ```
 
-### Setting Up Tests
-
-**1. Install test dependencies:**
-```bash
-pip install pytest pytest-mock pytest-cov
-```
-
-**2. Set up test environment:**
-```bash
-# Create test environment file
-cp .env.example .env.test
-echo "OPENAI_API_KEY=test_key" >> .env.test
-echo "ANTHROPIC_API_KEY=test_key" >> .env.test
-echo "GOOGLE_API_KEY=test_key" >> .env.test
-```
+## 🧪 Testing & Development
 
 ### Running Tests
 
-**Basic Test Execution:**
 ```bash
+# Install development dependencies
+pip install -r requirements-dev.txt
+
 # Run all tests
 pytest
 
-# Run with verbose output
-pytest -v
-
-# Run specific test file
-pytest tests/test_youtube_parser.py
-
-# Run specific test function
-pytest tests/test_youtube_parser.py::TestGetVideoId::test_standard_youtube_url
-```
-
-**Coverage Testing:**
-```bash
-# Run tests with coverage report
+# Run with coverage report
 pytest --cov=src tests/
 
-# Generate HTML coverage report
-pytest --cov=src --cov-report=html tests/
-open htmlcov/index.html  # View coverage report
-
-# Coverage with missing lines
-pytest --cov=src --cov-report=term-missing tests/
-```
-
-**Test Categories:**
-```bash
-# Run only unit tests
-pytest tests/ -k "not integration"
-
-# Run only integration tests
-pytest tests/test_integration.py
-
-# Run tests for specific module
-pytest tests/test_youtube_parser.py tests/test_utils.py
-```
-
-**Performance and Load Testing:**
-```bash
-# Run tests with timing
-pytest --durations=10
-
-# Run tests in parallel (if pytest-xdist installed)
-pytest -n auto
-```
-
-### Test Examples
-
-**Manual Testing Scenarios:**
-
-**1. Test with Real YouTube Video:**
-```bash
-# Use a known public video for testing
-python main.py "https://www.youtube.com/watch?v=jNQXAC9IVRw" --provider openai
-```
-
-**2. Test Error Handling:**
-```bash
-# Test with invalid URL
-python main.py "https://example.com/fake-video"
-
-# Test with private video
-python main.py "https://www.youtube.com/watch?v=invalid_video_id"
-
-# Test with missing API key
-unset OPENAI_API_KEY
-python main.py "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-```
-
-**3. Test Different Languages:**
-```bash
-# Test Spanish transcript
-python main.py "https://www.youtube.com/watch?v=spanish_video_id" --language es
-
-# Test automatic translation
-python main.py "https://www.youtube.com/watch?v=english_video_id" --language fr
-```
-
-### Debugging Tests
-
-**Run Tests in Debug Mode:**
-```bash
-# Drop into debugger on failure
-pytest --pdb
-
-# Run with print statements visible
-pytest -s
-
-# Run single test with debugging
-pytest -s -vvv tests/test_youtube_parser.py::test_get_video_id
-```
-
-**Mock Testing:**
-```bash
-# Test with mocked APIs (no real API calls)
-export PYTEST_MOCK_MODE=true
-pytest tests/test_llm_providers.py
-```
-
-### Continuous Integration
-
-**GitHub Actions Example (`.github/workflows/test.yml`):**
-```yaml
-name: Tests
-on: [push, pull_request]
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [3.8, 3.9, 3.10, 3.11]
-    steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        pip install -r requirements.txt
-        pip install pytest pytest-cov
-    - name: Run tests
-      run: pytest --cov=src tests/
-```
-
-### Performance Benchmarks
-
-**Expected Performance:**
-- URL parsing: < 1ms
-- Transcript fetching: 1-5 seconds
-- LLM generation: 10-30 seconds
-- File saving: < 100ms
-- Total workflow: 15-45 seconds
-
-**Benchmark Testing:**
-```bash
-# Time the full workflow
-time python main.py "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-
-# Profile memory usage
-python -m memory_profiler main.py "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-```
-
-### Troubleshooting
-
-**Common Issues:**
-
-**1. Import Errors:**
-```bash
-# Ensure src directory is in Python path
-export PYTHONPATH="${PYTHONPATH}:$(pwd)"
-pytest
-```
-
-**2. API Key Issues:**
-```bash
-# Verify environment variables
-python -c "import os; print('OpenAI:', bool(os.getenv('OPENAI_API_KEY')))"
-```
-
-**3. Network Issues:**
-```bash
-# Test with offline mode (mocked tests only)
-pytest tests/ -k "not integration and not network"
-```
-
-**4. Permission Errors:**
-```bash
-# Ensure write permissions for output directory
-mkdir -p output && chmod 755 output
-python main.py "https://youtu.be/dQw4w9WgXcQ" --output output/test.md
-```
-
-### Test Data Management
-
-**Fixtures and Test Data:**
-```python
-# tests/conftest.py contains shared test data
-SAMPLE_VIDEO_ID = "dQw4w9WgXcQ"
-SAMPLE_TRANSCRIPT = "Hello everyone, welcome to my channel..."
-MOCK_BLOG_CONTENT = "# Amazing Blog Post\n\nThis is content..."
-```
-
-**Environment-Specific Testing:**
-```bash
-# Test with different Python versions
-python3.8 -m pytest tests/
-python3.9 -m pytest tests/
-python3.10 -m pytest tests/
-```
-
-# Run with coverage
-pytest --cov=src tests/
+# Run specific test categories
+pytest tests/test_youtube_parser.py  # Unit tests
+pytest tests/test_integration.py    # Integration tests
 
 # Run with verbose output
 pytest -v tests/
 ```
 
-### 📊 Test Coverage Goals
+### Development Workflow
 
-- **Overall Coverage:** ≥90%
-- **Core Functions:** 100%
-- **Error Handling:** ≥95%
-- **Edge Cases:** ≥85%
+```bash
+# Install development tools
+pip install -r requirements-dev.in
 
-## 📝 Example Output
+# Code formatting
+black src/ tests/
 
-The tool generates structured blog posts with:
-- Engaging title
-- Introduction paragraph
-- Main content sections
-- Key takeaways
-- Conclusion
-- Proper Markdown formatting
+# Linting
+flake8 src/ tests/
 
-## 🤝 Contributing
+# Type checking
+mypy src/
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+# Run complete check
+pytest --cov=src tests/ && black --check src/ && flake8 src/
+```
+
+### Test Coverage Goals
+
+- 🎯 **Overall Coverage:** ≥90%
+- 🎯 **Core Functions:** 100%
+- 🎯 **Error Handling:** ≥95%
+- 🎯 **Edge Cases:** ≥85%
+
+## 📊 Performance Metrics
+
+| Operation | Expected Time | Notes |
+|-----------|---------------|-------|
+| URL Parsing | < 1ms | Instant validation |
+| Transcript Fetch | 1-5 seconds | Depends on video length |
+| AI Generation | 10-45 seconds | Varies by provider & content |
+| File Save | < 100ms | Local disk operation |
+| **Total Workflow** | **15-60 seconds** | End-to-end processing |
+
+### Optimization Tips
+
+- 🚀 Use `--language en` for fastest transcript fetching
+- ⚡ Choose OpenAI for fastest AI generation
+- 📦 Process shorter videos (< 30 min) for optimal performance
+- 🔄 Enable batch processing for multiple videos
+
+## 🎨 Output Examples
+
+### Generated Blog Structure
+
+```markdown
+# Video Title Here
+
+**Source:** [Original Video](https://youtube.com/watch?v=example)
+**Generated:** 2024-01-15
+
+## Introduction
+Engaging opening paragraph that hooks the reader...
+
+## Main Content
+### Key Point 1
+Detailed explanation with insights...
+
+### Key Point 2  
+Further elaboration on important topics...
+
+## Key Takeaways
+- 📌 Important insight #1
+- 📌 Important insight #2
+- 📌 Important insight #3
+
+## Conclusion
+Thoughtful wrap-up that reinforces main themes...
+
+---
+*This blog post was generated from a YouTube video using BlogTubeAI.*
+```
+
+### File Naming Convention
+
+Generated files follow this pattern:
+```
+output/
+├── amazing_tutorial_video_dQw4w9WgXcQ.md
+├── python_tips_and_tricks_xB2kF7pNvQ8.md
+└── ai_explained_simply_mK9hR3tYw7L.md
+```
+
+## 🔧 Troubleshooting
+
+### Common Issues & Solutions
+
+**❌ "No transcripts available"**
+```bash
+# Some videos don't have transcripts - check video settings
+# Try a different video or check if captions are enabled
+```
+
+**❌ "Invalid API key"** 
+```bash
+# Verify your .env file has correct API keys
+cat .env | grep API_KEY
+
+# Test API key validity
+python -c "import openai; print('OpenAI key valid')"
+```
+
+**❌ "Permission denied writing file"**
+```bash
+# Ensure output directory permissions
+mkdir -p output && chmod 755 output
+
+# Or specify different output location
+python main.py "URL" --output ~/Documents/blog.md
+```
+
+**❌ "Rate limit exceeded"**
+```bash
+# Wait and retry, or switch AI providers
+python main.py "URL" --provider claude  # Try different provider
+```
+
+**❌ "Video unavailable"**
+```bash
+# Check if video is public and accessible
+# Some videos are region-locked or private
+```
+
+### Debug Mode
+
+```bash
+# Enable detailed logging
+export PYTHONPATH="${PYTHONPATH}:$(pwd)"
+python main.py "URL" --interactive  # More verbose output
+
+# Check logs for detailed error information
+tail -f logs/youtube-blog-converter_$(date +%Y-%m-%d).log
+```
+
+### Performance Issues
+
+```bash
+# Profile memory usage
+pip install memory-profiler
+python -m memory_profiler main.py "URL"
+
+# Time operations
+time python main.py "URL"
+```
+
+## 🌟 Advanced Features
+
+### Custom AI Prompts
+
+Modify `src/llm_providers.py` to customize blog generation:
+
+```python
+# Example: Add custom prompt for technical content
+TECH_BLOG_PROMPT = """
+Transform this transcript into a technical blog post with:
+- Code examples where applicable
+- Step-by-step tutorials
+- Technical depth appropriate for developers
+"""
+```
+
+### API Rate Limiting
+
+Built-in rate limiting prevents API quota exhaustion:
+- ⏰ OpenAI: 3 requests/minute (configurable)
+- ⏰ Claude: 5 requests/minute
+- ⏰ Gemini: 10 requests/minute
+
+### Webhook Integration
+
+Extend for automated processing:
+```python
+# Example webhook endpoint for automated blog generation
+@app.route('/webhook/youtube', methods=['POST'])
+def process_youtube_webhook():
+    video_url = request.json.get('video_url')
+    # Process with BlogTubeAI...
+```
+
+## 📈 Roadmap
+
+### Upcoming Features
+
+- 🎯 **v2.0** - Web interface with drag-and-drop
+- 🔄 **v2.1** - Batch processing dashboard  
+- 🌐 **v2.2** - Multiple output formats (PDF, HTML)
+- 🎨 **v2.3** - Custom blog templates
+- 📊 **v2.4** - Analytics and content insights
+- 🔗 **v2.5** - CMS integration (WordPress, Ghost)
+
+### Contributing
+
+We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+```bash
+# Development setup
+git clone https://github.com/yourusername/BlogTubeAI.git
+cd BlogTubeAI
+pip install -r requirements-dev.in
+pytest  # Run tests before contributing
+```
 
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## ⚠️ Limitations
+## 🤝 Support
 
-- Requires publicly available YouTube videos with transcripts
-- API rate limits apply based on chosen LLM provider
-- Transcript quality depends on YouTube's auto-generation
+- 📧 **Email:** support@BlogTubeAI.com
+- 💬 **Discord:** [BlogTubeAI Community](https://discord.gg/BlogTubeAI)
+- 🐛 **Issues:** [GitHub Issues](https://github.com/yourusername/BlogTubeAI/issues)
+- 📖 **Docs:** [Full Documentation](https://docs.BlogTubeAI.com)
 
-## 🔗 Related Projects
+## ⭐ Acknowledgments
 
-- [BlogForgeAI](../README.md) - Main project repository
+- 🙏 **youtube-transcript-api** - For robust transcript extraction
+- 🎨 **Rich** - For beautiful CLI interfaces
+- 🤖 **OpenAI, Anthropic, Google** - For powerful AI models
+- 👥 **Contributors** - For making this project better
+
+---
+
+<div align="center">
+
+**Made with ❤️ by the BlogTubeAI Team**
+
+[⭐ Star us on GitHub](https://github.com/yourusername/BlogTubeAI) | [🐦 Follow on Twitter](https://twitter.com/BlogTubeAI) | [📧 Newsletter](https://newsletter.BlogTubeAI.com)
+
+</div>
 

@@ -1,0 +1,17 @@
+# Core dependencies
+youtube-transcript-api
+click
+rich
+requests
+python-dotenv
+
+# LLM providers
+openai
+anthropic
+google-generativeai
+
+# Additional utilities
+packaging
+urllib3
+
+
