@@ -237,3 +237,4 @@ models/
 *.bak
 *.backup
 *.old
+transcripts/
