@@ -110,7 +110,7 @@ class TestAzureOpenAIProvider:
         """Test default deployment name when not specified."""
         mock_openai.AzureOpenAI.return_value = Mock()
         provider = AzureOpenAIProvider()
-        assert provider.deployment_name == 'gpt-4'
+        assert provider.deployment_name == 'gpt-4.1'
     
     @patch.dict('os.environ', {
         'AZURE_OPENAI_API_KEY': 'test-key',
