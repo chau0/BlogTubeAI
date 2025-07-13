@@ -231,7 +231,6 @@ temp_*
 # AI model files (if you download any locally)
 *.bin
 *.safetensors
-models/
 
 # Backup files
 *.bak

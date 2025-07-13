@@ -11,7 +11,15 @@ class NotificationService:
     """Service for sending WebSocket notifications"""
     
     def __init__(self):
-        self.websocket_manager = WebSocketManager()
+        self._websocket_manager =None 
+    
+    @property
+    def websocket_manager(self):
+        """Lazy-loaded websocket manager"""
+        if self._websocket_manager is None:
+            from ..api.websocket.manager import websocket_manager
+            self._websocket_manager = websocket_manager
+        return self._websocket_manager
     
     async def broadcast_job_update(self, job_id: str, data: Dict[str, Any]) -> None:
         """Broadcast job status update to subscribed clients"""

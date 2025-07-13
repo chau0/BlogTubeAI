@@ -1,21 +1,24 @@
 """WebSocket endpoint handlers"""
-
+import asyncio
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, HTTPException
 from typing import Optional
 
 from .manager import websocket_manager
-from ...core.job_manager import JobManager
 
 websocket_router = APIRouter()
-job_manager = JobManager()
 
+def get_job_manager():
+    """Lazy import to avoid circular dependency"""
+    from ...core.job_manager import JobManager
+    return JobManager()
 
 @websocket_router.websocket("/jobs/{job_id}")
 async def websocket_job_updates(websocket: WebSocket, job_id: str):
     """WebSocket endpoint for job status updates"""
     
-    # Verify job exists
+    job_manager = get_job_manager()
     job = await job_manager.get_job(job_id)
+
     if not job:
         await websocket.close(code=4004, reason="Job not found")
         return
@@ -47,6 +50,7 @@ async def websocket_job_updates(websocket: WebSocket, job_id: str):
 async def websocket_system_updates(websocket: WebSocket):
     """WebSocket endpoint for system-wide updates"""
     await websocket.accept()
+    job_manager = get_job_manager()
     
     try:
         # Send system stats periodically
