@@ -12,7 +12,7 @@
 
 ## 📋 Overview
 
-BlogTubeAI is an intelligent tool that converts YouTube video content into well-structured blog posts using advanced AI language models. It automatically extracts video transcripts, processes them through your choice of AI providers, and generates engaging, publication-ready blog content.
+BlogTubeAI is an intelligent tool that converts YouTube video content into well-structured blog posts using advanced AI language models. It features both a powerful **CLI application** and a modern **web interface** with real-time progress tracking.
 
 ### 🎯 Perfect For
 
@@ -27,29 +27,70 @@ BlogTubeAI is an intelligent tool that converts YouTube video content into well-
 - 🌍 **Multi-language Support** - Extract transcripts in 50+ languages
 - 🤖 **Multiple AI Providers** - OpenAI GPT, Anthropic Claude, Google Gemini, Azure OpenAI
 - 🎨 **Smart Formatting** - Professional Markdown output with proper structure
-- 💬 **Interactive CLI** - User-friendly command-line interface with Rich UI
+- 💻 **CLI + Web Interface** - Choose between command-line or browser-based UI
+- 📊 **Real-time Progress** - WebSocket-powered live updates (web interface)
 - 📁 **Organized Output** - Automatic file naming and directory management
 - 🔍 **Comprehensive Logging** - Daily log files for debugging and monitoring
 - ⚡ **Error Handling** - Robust error management for private/unavailable videos
-- 🔄 **Batch Processing** - Process multiple videos efficiently
+- 🏗️ **Modular Architecture** - Clean separation between CLI and web components
+
+## 🏗️ Project Architecture
+
+```
+BlogTubeAI/
+├── 📄 main.py                          # CLI Application Entry Point
+├── 📁 backend/                         # Backend & Core Logic
+│   ├── 📁 src/
+│   │   ├── 📁 core/                    # Core Business Logic (migrated from Phase 1)
+│   │   │   ├── 🔗 youtube_parser.py    # YouTube URL parsing & video info
+│   │   │   ├── 📝 transcript_handler.py # Transcript fetching & processing
+│   │   │   ├── 🤖 llm_providers.py     # AI provider integrations
+│   │   │   ├── 📰 blog_formatter.py    # Markdown formatting & output
+│   │   │   └── 🛠️ utils.py             # Utility functions
+│   │   ├── 📁 web/                     # FastAPI Web Application
+│   │   ├── 📁 api/                     # REST API Endpoints
+│   │   ├── 📁 models/                  # Data Models & Schemas
+│   │   └── 📁 services/                # Business Logic Services
+│   ├── 📁 tests/                       # Comprehensive Test Suite
+│   │   ├── 📁 test_core/               # Core Module Tests
+│   │   ├── 📁 test_web/                # Web API Tests
+│   │   └── 🧪 test_main.py             # CLI Integration Tests
+│   └── 📄 Makefile                     # Backend Development Commands
+├── 📁 frontend/                        # React Web Interface
+│   ├── 📁 src/
+│   │   ├── 📁 components/              # React Components
+│   │   ├── 📁 pages/                   # Page Components
+│   │   ├── 📁 hooks/                   # Custom React Hooks
+│   │   └── 📁 lib/                     # Utilities & API Client
+│   └── 📄 package.json                 # Frontend Dependencies
+├── 📁 docs/                            # Documentation
+└── 📄 Makefile                         # Project Orchestrator
+```
 
 ## 🛠️ Tech Stack
 
+### **Core Architecture**
 | Component | Technology | Purpose |
 |-----------|------------|---------|
-| **Core** | Python 3.8+ | Main application framework |
+| **Core Logic** | Python 3.8+ | Shared business logic |
+| **CLI Interface** | Rich + Click | Command-line experience |
+| **Web Backend** | FastAPI | REST API + WebSockets |
+| **Web Frontend** | React 18 + TypeScript + Vite | Modern web interface |
+| **Database** | SQLite/PostgreSQL | Job tracking & history |
+
+### **AI & External APIs**
+| Component | Technology | Purpose |
+|-----------|------------|---------|
 | **Transcripts** | youtube-transcript-api | YouTube transcript extraction |
 | **AI Models** | OpenAI, Anthropic, Google | Content generation |
-| **CLI Interface** | Rich + Click | Enhanced user experience |
 | **Environment** | python-dotenv | Configuration management |
-| **HTTP** | requests + urllib3 | API communications |
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 
-- Python 3.8 or higher
-- Make (for simplified workflow)
+- **Python 3.8+** for CLI and backend
+- **Node.js 16+** for web interface (optional)
 - At least one AI provider API key
 - Internet connection for YouTube access
 
@@ -60,17 +101,17 @@ BlogTubeAI is an intelligent tool that converts YouTube video content into well-
 git clone https://github.com/yourusername/BlogTubeAI.git
 cd BlogTubeAI
 
-# One-command setup (installs dependencies, creates directories, and .env template)
+# Complete project setup (CLI + Backend + Frontend)
 make setup
 ```
 
 ### 2. Configuration
 
-After running `make setup`, configure your API keys:
+Configure your API keys in the backend:
 
 ```bash
-# Edit the generated .env file with your API keys
-nano .env
+# Edit the backend environment file
+nano backend/.env
 ```
 
 Required environment variables:
@@ -83,477 +124,314 @@ AZURE_OPENAI_API_KEY=your-azure-key-here
 AZURE_OPENAI_ENDPOINT=https://your-resource.openai.azure.com/
 ```
 
-### 3. Verify Setup
+### 3. Choose Your Interface
 
+#### Option A: CLI Application (Fastest Start)
 ```bash
-# Check that everything is configured correctly
-make check-env
+# Start CLI in interactive mode
+make cli-run
 
-# Run a quick health check
-make doctor
+# Or run directly
+python main.py --interactive
 ```
 
-### 4. Basic Usage
-
+#### Option B: Web Interface (Full Experience)
 ```bash
-# Start interactive mode for guided experience
-make run
-
-# Quick demo with a sample video
-make demo
-
-# Run with an example TED Talk
-make example
-```
-
-## 📖 Usage
-
-### Make Commands Overview
-
-BlogTubeAI includes a comprehensive Makefile for streamlined development and usage:
-
-```bash
-# Get help with all available commands
-make help
-
-# Setup & Installation
-make setup           # Complete development setup
-make install         # Install production dependencies only
-make dev-install     # Install development dependencies
-
-# Application Usage
-make run             # Start interactive mode
-make demo            # Quick demo with sample video
-make example         # Run with example TED Talk
-
-# Development
-make test            # Run all tests
-make format          # Format code with black
-make lint            # Run linter
-make check-all       # Run all code quality checks
-
-# Maintenance
-make clean           # Remove cache files
-make logs            # View recent logs
-make version         # Show version info
-```
-
-### Command Line Options
-
-For direct Python usage:
-```bash
-python main.py [URL] [OPTIONS]
-
-Arguments:
-  URL                     YouTube video URL (optional in interactive mode)
-
-Options:
-  -l, --language TEXT     Transcript language (en, es, fr, de, etc.)
-  -p, --provider CHOICE   AI provider [openai|claude|gemini|azureopenai]
-  -o, --output PATH       Custom output file path
-  -i, --interactive       Enable interactive mode
-  --help                  Show help message and exit
-```
-
-### Real-World Examples
-
-**1. Educational Content Processing:**
-```bash
-# Interactive mode - recommended for beginners
-make run
-
-# Direct command line usage
-python main.py "https://youtu.be/lecture-video-id" \
-  --language en \
-  --provider openai \
-  --output "study-guides/physics-101-lecture-5.md"
-```
-
-**2. Multi-language Content:**
-```bash
-# Process Spanish educational content
-python main.py "https://youtu.be/spanish-video" \
-  --language es \
-  --provider claude
-```
-
-**3. Conference Talk Processing:**
-```bash
-# Convert tech conference presentation
-python main.py "https://youtu.be/tech-talk" \
-  --provider gemini \
-  --output "conference-notes/ai-trends-2024.md"
-```
-
-**4. Batch Processing Script:**
-```bash
-#!/bin/bash
-# process_videos.sh - Batch convert multiple videos
-
-videos=(
-    "https://youtu.be/video1"
-    "https://youtu.be/video2" 
-    "https://youtu.be/video3"
-)
-
-for video in "${videos[@]}"; do
-    echo "Processing: $video"
-    python main.py "$video" --provider openai
-    sleep 5  # Rate limiting
-done
-```
-
-### Interactive Mode Features
-
-The interactive mode provides:
-- ✅ URL validation and video preview
-- 🌐 Language selection from available options
-- 🤖 AI provider comparison and selection
-- 📁 Custom output path specification
-- 👀 Blog preview before saving
-
-```bash
-# Start interactive session
-make run
-
-# Example interactive session:
-🎬 YouTube to Blog Converter
-Transform videos into engaging blog posts!
-
-Enter YouTube URL: https://youtu.be/example
-✅ Video ID extracted: example
-📹 Video: Amazing Tutorial Video
-
-Available Transcript Languages:
-┌──────┬─────────┐
-│ Code │ Language│
-├──────┼─────────┤
-│ en   │ English │
-│ es   │ Spanish │
-│ fr   │ French  │
-└──────┴─────────┘
-
-Select language code [en]: en
-
-Available LLM Providers:
-┌─────────────┬─────────────────────┐
-│ Provider    │ Description         |
-├─────────────┼─────────────────────┤
-│ openai      │ OpenAI GPT models   |
-│ claude      │ Anthropic Claude    |
-│ gemini      │ Google Gemini       |
-│ azureopenai │ Azure OpenAI        |
-└─────────────┴─────────────────────┘
-
-Select LLM provider [openai]: claude
-```
-
-## 📁 Project Structure
-
-```
-BlogTubeAI/
-├── 📄 main.py                    # Main application entry point
-├── 📄 Makefile                   # Development workflow automation
-├── 📁 src/                       # Core application modules
-│   ├── 🔗 youtube_parser.py      # URL parsing and video ID extraction
-│   ├── 📝 transcript_handler.py  # Transcript fetching and processing
-│   ├── 🤖 llm_providers.py       # AI provider integrations
-│   ├── 📰 blog_formatter.py      # Markdown formatting and output
-│   └── 🛠️ utils.py               # Utility functions and helpers
-├── 📁 tests/                     # Comprehensive test suite
-│   ├── 🧪 test_youtube_parser.py
-│   ├── 🧪 test_transcript_handler.py
-│   ├── 🧪 test_llm_providers.py
-│   ├── 🧪 test_blog_formatter.py
-│   ├── 🧪 test_utils.py
-│   ├── 🧪 test_main.py
-│   └── ⚙️ conftest.py
-├── 📁 output/                    # Generated blog posts
-├── 📁 logs/                      # Application logs
-├── 📄 requirements.in            # Core dependencies
-├── 📄 requirements-dev.in        # Development dependencies
-├── 📄 .env.example              # Environment template
-└── 📖 README.md                 # This file
-```
-
-## 🧪 Development
-
-### Development Workflow
-
-```bash
-# Complete development setup
+# Start both backend and frontend
 make dev
 
-# Run tests before making changes
-make test
+# This starts:
+# - Backend API on http://localhost:8000
+# - Frontend app on http://localhost:5173
+```
 
-# Format and lint your code
-make format
-make lint
+#### Option C: Backend Only (API Development)
+```bash
+# Start just the backend API
+make backend-dev
+```
 
-# Run all quality checks
-make check-all
+## 📖 Usage Guide
+
+### CLI Application
+
+The CLI provides the fastest way to convert videos:
+
+```bash
+# Interactive mode (recommended)
+make cli-run
+
+# Direct URL processing
+python main.py "https://youtu.be/video-id" --provider openai
+
+# Batch processing with custom options
+python main.py "https://youtu.be/video-id" \
+  --language es \
+  --provider claude \
+  --output "articles/my-blog-post.md"
+```
+
+**CLI Features:**
+- ✅ Interactive video URL input with validation
+- ✅ Language selection from available transcripts
+- ✅ AI provider comparison and selection
+- ✅ Real-time progress display
+- ✅ Instant blog preview and save
+
+### Web Interface
+
+The web interface provides a modern, user-friendly experience:
+
+```bash
+# Start web interface
+make dev
+# Visit http://localhost:5173
+```
+
+**Web Features:**
+- 🎨 **Beautiful UI** - Modern React interface with dark/light themes
+- 📊 **Real-time Progress** - Live updates via WebSocket
+- 📝 **Multi-step Workflow** - Guided conversion process
+- 📚 **Job History** - Track and manage previous conversions
+- 💾 **Download Options** - Multiple export formats
+- 📱 **Mobile Responsive** - Works on all devices
+
+### Development Commands
+
+The project includes comprehensive Makefiles for development:
+
+#### **Project-Level Commands (Root Makefile)**
+```bash
+make help              # Show all available commands
+make setup             # Complete project setup
+make dev               # Start full development environment
+make test-all          # Run all tests (CLI + Backend + Frontend)
+make clean             # Clean all components
+make check-env         # Check project environment
+
+# Component-specific commands
+make cli               # CLI application commands
+make backend           # Backend development commands  
+make frontend          # Frontend development commands
+```
+
+#### **CLI Application Commands**
+```bash
+make cli-run           # Run CLI interactively
+make cli-demo          # Run CLI demo
+make cli-test          # Test CLI functionality
+```
+
+#### **Backend Development Commands**
+```bash
+make -C backend help          # Show backend commands
+make -C backend setup         # Setup backend environment
+make -C backend run-dev       # Start FastAPI development server
+make -C backend test          # Run backend tests
+make -C backend test-core     # Test core modules
+make -C backend test-web      # Test web APIs
+```
+
+#### **Frontend Development Commands**
+```bash
+make -C frontend help         # Show frontend commands
+make -C frontend install      # Install dependencies
+make -C frontend dev          # Start development server
+make -C frontend build        # Build for production
+make -C frontend test         # Run frontend tests
+```
+
+## 📁 Updated Project Structure
+
+### **After Migration Benefits:**
+
+1. **Unified Core Logic** - All business logic in `backend/src/core/`
+2. **Clean Separation** - CLI, Backend API, and Frontend clearly separated
+3. **Shared Testing** - Core module tests in `backend/tests/test_core/`
+4. **Scalable Architecture** - Ready for both Phase 1 (CLI) and Phase 2 (Web) 
+5. **Professional Organization** - Follows Python/React project best practices
+
+### **Import Structure:**
+```python
+# CLI Application (main.py)
+from backend.src.core.youtube_parser import get_video_id, get_video_title
+from backend.src.core.llm_providers import LLMProviderFactory
+
+# Backend Web APIs
+from ..core.youtube_parser import get_video_id  # Clean relative imports
+from ..core.llm_providers import LLMProviderFactory
+
+# Tests
+from backend.src.core.youtube_parser import get_video_id  # Absolute imports
+```
+
+## 🧪 Testing & Quality
+
+### **Comprehensive Test Coverage**
+```bash
+# Run all tests across the project
+make test-all
+
+# Component-specific testing
+make cli-test                    # CLI functionality
+make -C backend test-core        # Core business logic
+make -C backend test-web         # Web APIs
+make -C frontend test            # Frontend components
+```
+
+### **Code Quality Tools**
+```bash
+# Format and lint (backend)
+make -C backend format
+make -C backend lint
+
+# Type checking
+make -C backend type-check
 
 # Pre-commit checks
 make precommit
 ```
 
-### Running Tests
+## 🌟 Advanced Features
 
-```bash
-# Run all tests
-make test
+### **Real-time Web Interface**
+- WebSocket-powered live progress updates
+- Multi-step conversion workflow with validation
+- Job history with search and filtering
+- Download management with multiple formats
 
-# Run with coverage report
-make test-coverage
+### **Robust CLI Application**
+- Interactive mode with Rich UI components
+- Batch processing capabilities
+- Comprehensive error handling
+- Daily rotating log files
 
-# Generate HTML coverage report
-make test-html
-
-# Run specific test categories
-make test-unit          # Unit tests only
-make test-integration   # Integration tests only
-
-# Run tests in watch mode (requires pytest-watch)
-make test-watch
-```
-
-### Dependency Management
-
-```bash
-# Add a new production dependency
-make add-dep PACKAGE=package-name
-
-# Add a new development dependency  
-make add-dev-dep PACKAGE=package-name
-
-# Upgrade all dependencies
-make upgrade-deps
-
-# Sync environment with requirements
-make sync
-```
-
-### Test Coverage Goals
-
-- 🎯 **Overall Coverage:** ≥90%
-- 🎯 **Core Functions:** 100%
-- 🎯 **Error Handling:** ≥95%
-- 🎯 **Edge Cases:** ≥85%
+### **Developer Experience**
+- Hot reload for both frontend and backend development
+- Comprehensive testing with mocking
+- API documentation auto-generation
+- Docker support for deployment
 
 ## 📊 Performance Metrics
 
-| Operation | Expected Time | Notes |
-|-----------|---------------|-------|
-| URL Parsing | < 1ms | Instant validation |
-| Transcript Fetch | 1-5 seconds | Depends on video length |
-| AI Generation | 10-45 seconds | Varies by provider & content |
-| File Save | < 100ms | Local disk operation |
-| **Total Workflow** | **15-60 seconds** | End-to-end processing |
+| Operation | CLI Time | Web Time | Notes |
+|-----------|----------|----------|-------|
+| URL Parsing | < 1ms | < 1ms | Instant validation |
+| Transcript Fetch | 1-5s | 1-5s | Depends on video length |
+| AI Generation | 10-45s | 10-45s | Real-time progress in web |
+| File Save | < 100ms | < 100ms | Local/server storage |
+| **Total Workflow** | **15-60s** | **15-60s** | **Both interfaces** |
 
-### Optimization Tips
+## 🔧 Deployment
 
-- 🚀 Use `--language en` for fastest transcript fetching
-- ⚡ Choose OpenAI for fastest AI generation
-- 📦 Process shorter videos (< 30 min) for optimal performance
-- 🔄 Enable batch processing for multiple videos
-
-## 🎨 Output Examples
-
-### Generated Blog Structure
-
-```markdown
-# Video Title Here
-
-**Source:** [Original Video](https://youtube.com/watch?v=example)
-**Generated:** 2024-01-15
-
-## Introduction
-Engaging opening paragraph that hooks the reader...
-
-## Main Content
-### Key Point 1
-Detailed explanation with insights...
-
-### Key Point 2  
-Further elaboration on important topics...
-
-## Key Takeaways
-- 📌 Important insight #1
-- 📌 Important insight #2
-- 📌 Important insight #3
-
-## Conclusion
-Thoughtful wrap-up that reinforces main themes...
-
----
-*This blog post was generated from a YouTube video using BlogTubeAI.*
-```
-
-### File Naming Convention
-
-Generated files follow this pattern:
-```
-output/
-├── amazing_tutorial_video_dQw4w9WgXcQ.md
-├── python_tips_and_tricks_xB2kF7pNvQ8.md
-└── ai_explained_simply_mK9hR3tYw7L.md
-```
-
-## 🔧 Troubleshooting
-
-### Quick Diagnostics
-
+### **CLI Deployment**
 ```bash
-# Check environment and configuration
+# Package for distribution
+make build-cli
+
+# Install as system command
+pip install -e .
+```
+
+### **Web Deployment**
+```bash
+# Build frontend for production
+make -C frontend build
+
+# Start production server
+make -C backend run-prod
+
+# Docker deployment
+make docker-build
+make docker-run
+```
+
+## 🛠️ Troubleshooting
+
+### **Quick Diagnostics**
+```bash
+# Check entire project environment
 make check-env
 
-# Run comprehensive health check
-make doctor
-
-# View recent application logs
-make logs
-
-# Check version and system info
-make version
+# Component-specific checks
+make -C backend check-env
+make -C frontend check
 ```
 
-### Common Issues & Solutions
+### **Common Issues**
 
-**❌ "No transcripts available"**
+**❌ "Module not found" after migration**
 ```bash
-# Some videos don't have transcripts - check video settings
-# Try a different video or check if captions are enabled
-make demo  # Test with a known working video
+# Ensure you're running from project root
+cd BlogTubeAI
+python main.py --help
+
+# Or use make commands
+make cli-run
 ```
 
-**❌ "Invalid API key"** 
+**❌ "Backend API not accessible"**
 ```bash
-# Verify your .env file configuration
-make check-env
+# Check if backend is running
+make -C backend run-dev
 
-# Test API key validity
-python -c "import openai; print('OpenAI key valid')"
+# Verify frontend proxy configuration
+cat frontend/vite.config.ts
 ```
 
-**❌ "Permission denied writing file"**
+**❌ "Tests failing after migration"**
 ```bash
-# Ensure output directory exists and has proper permissions
-make create-dirs
-
-# Or specify different output location
-python main.py "URL" --output ~/Documents/blog.md
-```
-
-**❌ "Rate limit exceeded"**
-```bash
-# Wait and retry, or switch AI providers
-python main.py "URL" --provider claude  # Try different provider
-```
-
-**❌ "Video unavailable"**
-```bash
-# Check if video is public and accessible
-# Some videos are region-locked or private
-make example  # Test with a known working example
-```
-
-### Development Issues
-
-```bash
-# Clean and reset environment
-make clean-all
-make dev-install
-
-# Check code quality issues
-make check-all
-
-# Reset to fresh state
-make reset
-```
-
-## 🌟 Advanced Features
-
-### Custom AI Prompts
-
-Modify `src/llm_providers.py` to customize blog generation:
-
-```python
-# Example: Add custom prompt for technical content
-TECH_BLOG_PROMPT = """
-Transform this transcript into a technical blog post with:
-- Code examples where applicable
-- Step-by-step tutorials
-- Technical depth appropriate for developers
-"""
-```
-
-### API Rate Limiting
-
-Built-in rate limiting prevents API quota exhaustion:
-- ⏰ OpenAI: 3 requests/minute (configurable)
-- ⏰ Claude: 5 requests/minute
-- ⏰ Gemini: 10 requests/minute
-
-### Webhook Integration
-
-Extend for automated processing:
-```python
-# Example webhook endpoint for automated blog generation
-@app.route('/webhook/youtube', methods=['POST'])
-def process_youtube_webhook():
-    video_url = request.json.get('video_url')
-    # Process with BlogTubeAI...
+# Run tests from correct locations
+make -C backend test-core      # Core module tests
+make test-all                  # All project tests
 ```
 
 ## 📈 Roadmap
 
-### Upcoming Features
+### **Current Status**
+- ✅ **Phase 1**: Full-featured CLI application (99% complete)
+- ✅ **Migration**: Unified project structure (100% complete)
+- 🚧 **Phase 2**: Web interface backend (in development)
+- 📋 **Phase 2**: Frontend integration (ready for backend)
 
-- 🎯 **v2.0** - Web interface with drag-and-drop
-- 🔄 **v2.1** - Batch processing dashboard  
-- 🌐 **v2.2** - Multiple output formats (PDF, HTML)
-- 🎨 **v2.3** - Custom blog templates
-- 📊 **v2.4** - Analytics and content insights
-- 🔗 **v2.5** - CMS integration (WordPress, Ghost)
+### **Upcoming Features**
+- 🔄 **v2.0** - Complete web interface with real-time progress
+- 📊 **v2.1** - Advanced analytics and content insights
+- 🌐 **v2.2** - Multiple output formats (PDF, HTML, DOCX)
+- 🎨 **v2.3** - Custom blog templates and themes
+- 🔗 **v2.4** - CMS integration (WordPress, Ghost, Notion)
 
 ## 🤝 Contributing
 
-We welcome contributions! Here's how to get started:
+We welcome contributions! The new project structure makes it easy to contribute to specific components:
 
 ```bash
-# Fork and clone the repository
-git clone https://github.com/yourusername/BlogTubeAI.git
-cd BlogTubeAI
-
 # Setup development environment
-make dev
+make setup
 
-# Make your changes and test
+# Choose your area of contribution
+make cli               # CLI improvements
+make backend           # Backend API development  
+make frontend          # Frontend development
+
+# Run quality checks before submitting
 make precommit
-
-# Submit a pull request
 ```
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 📧 Contact
+## 📧 Contact & Documentation
 
 - 📧 **Email:** support@BlogTubeAI.com
 - 💬 **Discord:** [BlogTubeAI Community](https://discord.gg/BlogTubeAI)
 - 🐛 **Issues:** [GitHub Issues](https://github.com/yourusername/BlogTubeAI/issues)
-- 📖 **Docs:** [Full Documentation](https://docs.BlogTubeAI.com)
-
-## ⭐ Acknowledgments
-
-- 🙏 **youtube-transcript-api** - For robust transcript extraction
-- 🎨 **Rich** - For beautiful CLI interfaces
-- 🤖 **OpenAI, Anthropic, Google** - For powerful AI models
-- 👥 **Contributors** - For making this project better
+- 📖 **Full Documentation:**
+  - [CLI Guide](docs/cli-guide.md)
+  - [Backend API Docs](backend/README.md)
+  - [Frontend Guide](frontend/README.md)
+  - [Development Guide](docs/development.md)
 
 ---
 

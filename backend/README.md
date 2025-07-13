@@ -1,223 +1,402 @@
 # BlogTubeAI Backend
 
-A FastAPI-based web backend for BlogTubeAI that provides RESTful APIs and WebSocket connections to support a modern React frontend while reusing the existing CLI functionality.
+The FastAPI-based backend for BlogTubeAI that provides RESTful APIs and WebSocket connections for the React frontend while reusing the proven CLI functionality through shared core modules.
 
-## Table of Contents
+## 📋 Overview
 
-- [Overview](#overview)
-- [Prerequisites](#prerequisites)
-- [Quick Start](#quick-start)
-- [Development Setup](#development-setup)
-- [Project Structure](#project-structure)
-- [Configuration](#configuration)
-- [Running the Application](#running-the-application)
-- [Database Management](#database-management)
-- [Testing](#testing)
-- [Code Quality](#code-quality)
-- [Docker Development](#docker-development)
-- [API Documentation](#api-documentation)
-- [Deployment](#deployment)
-- [Troubleshooting](#troubleshooting)
-- [Contributing](#contributing)
+The BlogTubeAI backend serves as both:
+- **API Server** for the React web interface with real-time progress tracking
+- **Core Logic Provider** for the CLI application through shared modules
+- **Job Processing Engine** for background YouTube-to-blog conversion
 
-## Overview
-
-The BlogTubeAI backend provides:
-
-- **RESTful APIs** for video processing and job management
-- **WebSocket connections** for real-time progress updates
-- **Background job processing** for YouTube-to-blog conversion
-- **Database persistence** for job tracking and history
-- **Integration** with existing CLI modules
-- **Security features** including rate limiting and input validation
-
-### Key Features
+### 🏗️ Architecture Highlights
 
 - 🚀 **FastAPI** framework for high-performance async APIs
-- 📊 **Real-time progress tracking** via WebSocket connections
-- 🗄️ **SQLite/PostgreSQL** database with migrations
+- 📊 **Real-time progress tracking** via WebSocket connections  
+- 🗄️ **SQLite/PostgreSQL** database with Alembic migrations
 - 🔄 **Background job processing** with retry mechanisms
 - 📝 **Comprehensive logging** and error handling
 - 🛡️ **Security** with rate limiting and input validation
 - 🧪 **Full test coverage** with unit and integration tests
 - 🐳 **Docker support** for development and deployment
 
-## Prerequisites
+## 📁 Project Structure
 
-### System Requirements
+```
+backend/
+├── src/
+│   ├── core/                          # ✨ Core Business Logic (Migrated from Phase 1)
+│   │   ├── youtube_parser.py          # YouTube URL parsing & video info
+│   │   ├── transcript_handler.py      # Transcript fetching & processing  
+│   │   ├── llm_providers.py           # AI provider integrations
+│   │   ├── blog_formatter.py          # Markdown formatting & output
+│   │   └── utils.py                   # Shared utility functions
+│   │
+│   ├── web/                           # FastAPI Web Application
+│   │   ├── app.py                     # FastAPI application factory
+│   │   ├── config.py                  # Configuration management
+│   │   └── middleware/                # Custom middleware
+│   │
+│   ├── api/                           # REST API Endpoints
+│   │   ├── v1/                        # API version 1
+│   │   │   ├── videos.py              # Video processing endpoints
+│   │   │   ├── jobs.py                # Job management endpoints
+│   │   │   ├── providers.py           # LLM provider endpoints
+│   │   │   └── health.py              # Health check endpoints
+│   │   └── websocket/                 # WebSocket handlers
+│   │
+│   ├── models/                        # Data Models & Schemas
+│   │   ├── database.py                # SQLAlchemy models
+│   │   ├── schemas.py                 # Pydantic request/response models
+│   │   └── enums.py                   # Enum definitions
+│   │
+│   ├── services/                      # Business Logic Services
+│   │   ├── video_service.py           # Video processing service
+│   │   ├── job_service.py             # Job management service
+│   │   ├── provider_service.py        # LLM provider service
+│   │   └── notification_service.py    # WebSocket notifications
+│   │
+│   ├── database/                      # Database Operations
+│   │   ├── connection.py              # Database connection
+│   │   └── repositories/              # Data access layer
+│   │
+│   └── utils/                         # Web-specific Utilities
+│
+├── tests/                             # Comprehensive Test Suite
+│   ├── test_core/                     # ✨ Core Module Tests (Migrated)
+│   │   ├── test_youtube_parser.py
+│   │   ├── test_transcript_handler.py
+│   │   ├── test_llm_providers.py
+│   │   ├── test_blog_formatter.py
+│   │   └── test_utils.py
+│   ├── test_web/                      # Web API Tests
+│   │   ├── test_api_endpoints.py
+│   │   ├── test_websocket.py
+│   │   └── test_job_workflow.py
+│   ├── test_main.py                   # CLI Integration Tests
+│   ├── conftest.py                    # Test configuration
+│   └── fixtures/                      # Test data
+│
+├── requirements/                       # Dependency Management
+│   ├── base.txt                       # Core dependencies
+│   ├── web.txt                        # Web-specific dependencies
+│   ├── dev.txt                        # Development dependencies
+│   └── test.txt                       # Testing dependencies
+│
+├── scripts/                           # Utility Scripts
+│   ├── start_dev.py                   # Development server
+│   ├── migrate.py                     # Database migrations
+│   └── seed_data.py                   # Test data generation
+│
+├── data/                              # Application Data
+├── logs/                              # Log Files
+├── output/                            # Generated Content
+├── .env.example                       # Environment template
+├── alembic.ini                        # Database migration config
+├── Makefile                           # Development commands
+└── README.md                          # This file
+```
+
+## 🚀 Quick Start
+
+### Prerequisites
 
 - **Python 3.9+** (Python 3.11+ recommended)
 - **pip** package manager
-- **Git** for version control
-- **Make** for build automation (optional but recommended)
+- **SQLite** (included with Python) or **PostgreSQL** (optional)
 
-### Optional Dependencies
-
-- **Docker & Docker Compose** (for containerized development)
-- **PostgreSQL** (for production database)
-- **Redis** (for advanced caching, optional)
-
-### Platform Support
-
-- ✅ **Linux** (Ubuntu 20.04+, CentOS 8+)
-- ✅ **macOS** (10.15+)
-- ✅ **Windows** (Windows 10+ with WSL2 recommended)
-
-## Quick Start
-
-Get up and running in under 5 minutes:
+### 1. Setup Backend Environment
 
 ```bash
-# Clone the repository
-git clone <repository-url>
-cd BlogTubeAI/backend
+# From project root
+cd backend
 
-# Set up virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Complete setup (installs dependencies, sets up database, seeds test data)
+# Setup backend development environment
 make setup
 
-# Start development server
-make run
-
-# Open your browser to http://localhost:8000/docs
-```
-
-That's it! The API documentation will be available at `http://localhost:8000/docs`.
-
-## Development Setup
-
-### 1. Environment Setup
-
-```bash
-# Create and activate virtual environment
-python -m venv venv
-
-# Activate virtual environment
-# Linux/macOS:
-source venv/bin/activate
-
-# Windows:
-venv\Scripts\activate
-
-# Verify Python version
-python --version  # Should be 3.9+
-```
-
-### 2. Install Dependencies
-
-```bash
-# Install all development dependencies
-make install-dev
-
-# Or install manually:
+# Or manual setup
 pip install -r requirements/dev.txt
-
-# For production only:
-make install
 ```
 
-### 3. Environment Configuration
+### 2. Configure Environment
 
 ```bash
-# Copy environment template
+# Create environment file from template
 cp .env.example .env
 
-# Edit configuration
+# Edit with your API keys
 nano .env
 ```
 
 Required environment variables:
-
-```bash
-# Application Settings
+```env
+# Development settings
 ENVIRONMENT=development
-DEBUG=true
-SECRET_KEY=your-secret-key-here
+DEBUG=True
 
-# Database Configuration
+# Database
 DATABASE_URL=sqlite:///./data/app.db
 
-# API Keys (optional for development)
-OPENAI_API_KEY=your-openai-key
-ANTHROPIC_API_KEY=your-anthropic-key
-GOOGLE_AI_API_KEY=your-google-ai-key
+# API Keys (choose at least one)
+OPENAI_API_KEY=sk-your-openai-key-here
+ANTHROPIC_API_KEY=sk-ant-your-claude-key-here
+GOOGLE_API_KEY=your-gemini-key-here
 
-# Server Configuration
-HOST=0.0.0.0
-PORT=8000
-WORKERS=1
+# Azure OpenAI (optional)
+AZURE_OPENAI_API_KEY=your-azure-key-here
+AZURE_OPENAI_ENDPOINT=https://your-resource.openai.azure.com/
 
-# Logging
-LOG_LEVEL=INFO
-LOG_FILE=logs/app.log
+# Security
+SECRET_KEY=your-secret-key-here
+CORS_ORIGINS=["http://localhost:5173", "http://localhost:3000"]
 ```
 
-### 4. Database Setup
+### 3. Initialize Database
 
 ```bash
 # Run database migrations
 make migrate
 
-# Seed with test data
+# Seed with test data (optional)
 make seed
-
-# Or do both at once:
-make db-reset
 ```
 
-### 5. Verify Installation
+### 4. Start Development Server
 
 ```bash
-# Check development status
-make dev-status
+# Start FastAPI development server
+make run-dev
 
-# Run basic health check
-make test-unit
+# Server will be available at:
+# - API: http://localhost:8000
+# - Docs: http://localhost:8000/docs
+# - ReDoc: http://localhost:8000/redoc
 ```
 
-## Project Structure
+## 🛠️ Development Commands
 
-```
-backend/
-├── src/                          # Source code
-│   ├── web/                      # Web application layer
-│   │   ├── app.py                # FastAPI application
-│   │   ├── config.py             # Configuration
-│   │   └── middleware/           # Custom middleware
-│   ├── api/                      # API routes
-│   │   ├── v1/                   # API version 1
-│   │   └── websocket/            # WebSocket handlers
-│   ├── core/                     # Business logic
-│   │   ├── job_manager.py        # Job management
-│   │   └── background_tasks.py   # Task processing
-│   ├── models/                   # Data models
-│   │   ├── database.py           # SQLAlchemy models
-│   │   └── schemas.py            # Pydantic schemas
-│   ├── services/                 # Service layer
-│   ├── database/                 # Database operations
-│   └── utils/                    # Utilities
-├── tests/                        # Test suite
-│   ├── unit/                     # Unit tests
-│   ├── integration/              # Integration tests
-│   └── fixtures/                 # Test data
-├── requirements/                 # Dependencies
-│   ├── base.txt                  # Core dependencies
-│   ├── dev.txt                   # Development
-│   ├── web.txt                   # Web-specific
-│   └── test.txt                  # Testing
-├── scripts/                      # Utility scripts
-├── docker/                       # Docker configuration
-├── data/                         # Application data
-├── logs/                         # Log files
-└── Makefile                      # Build automation
+### **Core Development**
+```bash
+make help              # Show all available commands
+make setup             # Complete development environment setup
+make run-dev           # Start FastAPI development server
+make run-cli           # Run CLI application (using shared core modules)
 ```
 
-## Configuration
+### **Testing**
+```bash
+make test              # Run all backend tests
+make test-core         # Run core module tests (migrated from Phase 1)
+make test-web          # Run web API tests
+make test-coverage     # Run tests with coverage report
+make test-watch        # Run tests in watch mode
+```
 
-### Environment-Based Configuration
+### **Database Management**
+```bash
+make migrate           # Run pending database migrations
+make migrate-auto      # Auto-generate migration from models
+make migrate-down      # Rollback last migration
+make seed              # Seed database with test data
+make db-reset          # Reset database completely
+```
+
+### **Code Quality**
+```bash
+make format            # Format code with black
+make lint              # Run linter (flake8)
+make type-check        # Run type checker (mypy)
+make check-all         # Run all code quality checks
+```
+
+### **Application Operations**
+```bash
+make logs              # View recent application logs
+make shell             # Interactive Python shell with app context
+make clean             # Clean cache and temporary files
+```
+
+## 🔧 API Documentation
+
+### **REST API Endpoints**
+
+The backend provides a comprehensive REST API for the frontend:
+
+#### **Video Operations**
+```
+GET  /api/v1/videos/validate          # Validate YouTube URL
+GET  /api/v1/videos/{video_id}/info   # Get video metadata
+GET  /api/v1/videos/{video_id}/languages # Get available transcript languages
+```
+
+#### **Job Management**
+```
+POST   /api/v1/jobs/                  # Create new conversion job
+GET    /api/v1/jobs/                  # List user jobs
+GET    /api/v1/jobs/{job_id}          # Get job details
+DELETE /api/v1/jobs/{job_id}          # Cancel/delete job
+GET    /api/v1/jobs/{job_id}/download # Download job results
+```
+
+#### **Provider Management**
+```
+GET  /api/v1/providers/               # List available LLM providers
+POST /api/v1/providers/validate       # Validate provider API keys
+GET  /api/v1/providers/{provider}/status # Check provider health
+```
+
+#### **System Endpoints**
+```
+GET /health                           # Health check
+GET /metrics                          # Application metrics
+GET /docs                             # Interactive API documentation
+```
+
+### **WebSocket Endpoints**
+
+Real-time communication for job progress:
+
+```
+WS /ws/jobs/{job_id}                  # Job progress updates
+WS /ws/system                         # System-wide notifications
+```
+
+### **API Documentation**
+
+When running the development server, visit:
+- **Interactive Docs**: http://localhost:8000/docs
+- **ReDoc**: http://localhost:8000/redoc
+
+## 📊 Database Schema
+
+### **Job Tracking Tables**
+
+```sql
+-- Main jobs table
+CREATE TABLE jobs (
+    id TEXT PRIMARY KEY,              -- UUID
+    video_id TEXT NOT NULL,           -- YouTube video ID
+    video_url TEXT NOT NULL,          -- Original URL
+    video_title TEXT,                 -- Video title
+    language_code TEXT NOT NULL,      -- Transcript language
+    llm_provider TEXT NOT NULL,       -- AI provider used
+    status TEXT NOT NULL,             -- pending/processing/completed/failed
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    completed_at TIMESTAMP,
+    error_message TEXT,
+    output_file_path TEXT,
+    transcript_file_path TEXT
+);
+
+-- Job progress tracking
+CREATE TABLE job_progress (
+    job_id TEXT REFERENCES jobs(id),
+    step TEXT NOT NULL,               -- validation/transcript/generation/formatting
+    status TEXT NOT NULL,             -- pending/running/completed/failed
+    message TEXT,                     -- Progress message
+    progress_percentage INTEGER,      -- 0-100
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+## 🧪 Testing Guide
+
+### **Test Structure**
+
+The backend includes comprehensive tests for both core logic and web functionality:
+
+```bash
+# Core module tests (migrated from Phase 1)
+make test-core                        # All core module tests
+pytest tests/test_core/test_youtube_parser.py -v
+pytest tests/test_core/test_llm_providers.py -v
+
+# Web API tests
+make test-web                         # All web API tests  
+pytest tests/test_web/test_api_endpoints.py -v
+pytest tests/test_web/test_websocket.py -v
+
+# Integration tests
+pytest tests/test_main.py -v         # CLI integration tests
+pytest tests/test_web/test_job_workflow.py -v # End-to-end job tests
+```
+
+### **Test Coverage Goals**
+
+- 🎯 **Core Modules**: 95%+ coverage (migrated from Phase 1)
+- 🎯 **Web APIs**: 90%+ coverage
+- 🎯 **Integration**: 85%+ coverage
+- 🎯 **Overall**: 90%+ coverage
+
+### **Mocking and Fixtures**
+
+Tests use comprehensive mocking for external services:
+
+```python
+# Example: Testing with mocked YouTube API
+@patch('backend.src.core.youtube_parser.get_video_title')
+def test_video_title_extraction(mock_get_title):
+    mock_get_title.return_value = "Test Video Title"
+    # Test implementation...
+```
+
+## 🔒 Security Features
+
+### **API Security**
+- **Rate Limiting**: Configurable per-endpoint rate limits
+- **Input Validation**: Pydantic models for request validation
+- **CORS Configuration**: Configurable cross-origin resource sharing
+- **API Key Management**: Secure storage and validation of LLM provider keys
+
+### **Data Protection**
+- **SQL Injection Prevention**: SQLAlchemy ORM with parameterized queries
+- **XSS Protection**: Automatic HTML escaping in responses
+- **File Upload Security**: Validated file types and size limits
+- **Environment Variables**: Sensitive data stored in environment variables
+
+## 🚀 Deployment
+
+### **Production Setup**
+
+```bash
+# Build for production
+make build
+
+# Set production environment
+export ENVIRONMENT=production
+
+# Start production server
+make run-prod
+```
+
+### **Docker Deployment**
+
+```bash
+# Build Docker image
+make docker-build
+
+# Run with Docker Compose
+make docker-run
+
+# Or manually
+docker run -p 8000:8000 --env-file .env blogtube-backend
+```
+
+### **Environment Configuration**
+
+Production environment variables:
+```env
+ENVIRONMENT=production
+DEBUG=False
+DATABASE_URL=postgresql://user:pass@host:5432/blogtube
+SECRET_KEY=your-production-secret-key
+CORS_ORIGINS=["https://yourdomain.com"]
+```
+
+## 🔧 Configuration
+
+### **Environment-Based Configuration**
 
 The application supports multiple environments:
 
@@ -225,329 +404,150 @@ The application supports multiple environments:
 - **testing**: Test environment with in-memory database
 - **production**: Production deployment with optimizations
 
-### Key Configuration Files
+### **Key Configuration Files**
 
 | File | Purpose |
 |------|---------|
 | `.env` | Environment variables |
 | `src/web/config.py` | Application configuration |
 | `alembic.ini` | Database migration config |
-| `pyproject.toml` | Project metadata and tools |
+| `requirements/` | Dependency management |
 
-### Configuration Options
+## 🔍 Monitoring & Logging
 
-```python
-# Database
-DATABASE_URL = "sqlite:///./data/app.db"  # Development
-DATABASE_URL = "postgresql://user:pass@host:port/db"  # Production
-
-# Security
-SECRET_KEY = "your-secret-key"
-CORS_ORIGINS = ["http://localhost:3000"]
-
-# Rate Limiting
-RATE_LIMIT_PER_MINUTE = 60
-MAX_CONCURRENT_JOBS = 5
-
-# File Storage
-UPLOAD_DIR = "data/uploads"
-OUTPUT_DIR = "data/outputs"
-MAX_FILE_SIZE = 10485760  # 10MB
-```
-
-## Running the Application
-
-### Development Server
+### **Application Logs**
 
 ```bash
-# Start with auto-reload
-make run
+# View recent logs
+make logs
 
-# Or directly with uvicorn
-uvicorn src.web.app:app --reload --host 0.0.0.0 --port 8000
+# Follow logs in real-time
+tail -f logs/backend_$(date +%Y-%m-%d).log
+
+# Error logs only
+grep ERROR logs/backend_*.log
 ```
 
-The development server includes:
-- 🔄 **Auto-reload** on code changes
-- 📊 **Debug logging** and error details
-- 🌐 **CORS enabled** for frontend development
-- 📖 **Interactive docs** at `/docs`
-
-### Production Server
+### **Health Monitoring**
 
 ```bash
-# Production mode
-make run-prod
+# Check application health
+curl http://localhost:8000/health
 
-# Or with custom configuration
-uvicorn src.web.app:app --host 0.0.0.0 --port 8000 --workers 4
+# Get application metrics  
+curl http://localhost:8000/metrics
 ```
 
-Production features:
-- ⚡ **Multiple workers** for better performance
-- 🛡️ **Security hardening** and rate limiting
-- 📈 **Performance optimizations**
-- 📊 **Metrics and monitoring**
+## 🛠️ Troubleshooting
 
-### Environment-Specific Commands
+### **Common Issues**
 
+**❌ "Module not found" errors after migration**
 ```bash
-# Development
-ENVIRONMENT=development make run
-
-# Testing
-ENVIRONMENT=testing make test
-
-# Production
-ENVIRONMENT=production make run-prod
+# Ensure you're in the backend directory
+cd backend
+python -c "from src.core.youtube_parser import get_video_id; print('✅ Imports working')"
 ```
 
-## Database Management
-
-### Migrations
-
+**❌ "Database connection failed"**
 ```bash
-# Run pending migrations
-make migrate
+# Check database file permissions
+ls -la data/app.db
 
-# Create new migration
-make migrate-auto
-
-# Rollback last migration
-make migrate-down
-
-# Reset database completely
+# Reset database if corrupted
 make db-reset
 ```
 
-### Manual Migration Commands
-
+**❌ "API key validation failed"**
 ```bash
-# Check migration status
-alembic current
+# Check environment variables
+make check-env
 
-# Create custom migration
-alembic revision -m "Add new feature"
-
-# Upgrade to specific revision
-alembic upgrade head
-
-# Downgrade to specific revision
-alembic downgrade -1
+# Test API key manually
+python -c "import openai; print('✅ OpenAI key valid')"
 ```
 
-### Database Operations
-
+**❌ "Port already in use"**
 ```bash
-# Seed test data
-make seed
+# Find process using port 8000
+lsof -i :8000
 
-# Backup database
-cp data/app.db data/backup_$(date +%Y%m%d_%H%M%S).db
-
-# Database shell
-sqlite3 data/app.db
+# Kill process if needed
+kill -9 <PID>
 ```
 
-## Testing
-
-### Test Suite Overview
-
-- **Unit Tests**: Test individual components in isolation
-- **Integration Tests**: Test component interactions
-- **API Tests**: Test HTTP endpoints and responses
-- **WebSocket Tests**: Test real-time functionality
-
-### Running Tests
+### **Debug Mode**
 
 ```bash
-# Run all tests
-make test
+# Run with debug logging
+DEBUG=True make run-dev
 
-# Run specific test types
-make test-unit
-make test-integration
-
-# Run with coverage
-make test-coverage
-
-# Watch mode for development
-make test-watch
-
-# Run specific test file
-pytest tests/unit/test_job_manager.py -v
-
-# Run tests matching pattern
-pytest tests/ -k "test_video" -v
+# Interactive debugging
+make shell
 ```
 
-### Test Configuration
+## 📈 Performance Optimization
+
+### **Database Optimization**
+- Connection pooling for concurrent requests
+- Indexed columns for frequently queried fields
+- Query optimization with SQLAlchemy lazy loading
+
+### **API Performance**
+- Async/await pattern for non-blocking operations
+- Background task processing for long-running jobs
+- Response caching for static data
+
+### **Memory Management**
+- Proper cleanup of temporary files
+- Connection cleanup for external APIs
+- Garbage collection optimization
+
+## 🤝 Contributing to Backend
+
+### **Development Setup**
 
 ```bash
-# Test environment variables
-ENVIRONMENT=testing
-DATABASE_URL=sqlite:///:memory:
-TESTING=true
+# Setup development environment
+make setup
 
-# Run tests with specific config
-ENVIRONMENT=testing pytest tests/ -v
-```
-
-### Writing Tests
-
-Example test structure:
-
-```python
-# tests/unit/test_job_service.py
-import pytest
-from unittest.mock import AsyncMock, patch
-
-from src.services.job_service import JobService
-from src.models.schemas import JobCreateRequest
-
-@pytest.mark.asyncio
-async def test_create_job_success():
-    """Test successful job creation"""
-    service = JobService()
-    request = JobCreateRequest(
-        video_url="https://youtube.com/watch?v=test",
-        language_code="en",
-        llm_provider="openai"
-    )
-    
-    job = await service.create_job(request)
-    
-    assert job.status == "pending"
-    assert job.video_url == request.video_url
-```
-
-### Test Coverage
-
-```bash
-# Generate coverage report
-make test-coverage
-
-# View coverage in browser
-open htmlcov/index.html
-```
-
-Target coverage: **>90%** for all modules
-
-## Code Quality
-
-### Linting and Formatting
-
-```bash
-# Format code
-make format
-
-# Run linters
-make lint
-
-# Run all quality checks
-make check
-
-# Run pre-commit hooks
-make pre-commit
-```
-
-### Code Quality Tools
-
-- **Black**: Code formatting
-- **isort**: Import sorting
-- **flake8**: Style guide enforcement
-- **mypy**: Static type checking
-- **pytest**: Testing framework
-
-### Pre-commit Hooks
-
-Install pre-commit hooks for automatic quality checks:
-
-```bash
-# Install pre-commit
-pip install pre-commit
-
-# Install hooks
+# Install pre-commit hooks
 pre-commit install
 
-# Run on all files
-pre-commit run --all-files
+# Run tests before committing
+make precommit
 ```
 
-### Code Style Guidelines
+### **Code Style Guidelines**
 
-- Follow **PEP 8** style guide
-- Use **type hints** for all functions
-- Write **docstrings** for public methods
-- Maintain **>90% test coverage**
-- Use **meaningful variable names**
+- **PEP 8** compliance via black formatting
+- **Type hints** for all function signatures
+- **Docstrings** for all public functions and classes
+- **Unit tests** for all new functionality
 
-## Docker Development
+### **Pull Request Process**
 
-### Docker Setup
+1. Create feature branch from `main`
+2. Implement changes with tests
+3. Run quality checks: `make check-all`
+4. Submit pull request with description
 
-```bash
-# Build Docker images
-make docker-build
+## 📧 Support
 
-# Start containers
-make docker-run
+- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/yourusername/BlogTubeAI/issues)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/yourusername/BlogTubeAI/discussions)
+- 📖 **Documentation**: [Backend API Docs](http://localhost:8000/docs)
+- 📧 **Email**: backend-support@BlogTubeAI.com
 
-# View logs
-make docker-logs
+---
 
-# Stop containers
-make docker-stop
-```
+<div align="center">
 
-### Docker Compose Services
+**Backend built with ❤️ using FastAPI and Python**
 
-```yaml
-# docker-compose.yml
-services:
-  backend:
-    build: .
-    ports:
-      - "8000:8000"
-    environment:
-      - ENVIRONMENT=development
-    volumes:
-      - ./src:/app/src
-      - ./data:/app/data
+[⭐ Star the Project](https://github.com/yourusername/BlogTubeAI) | [📖 Full Documentation](../README.md) | [🚀 Frontend Guide](../frontend/README.md)
 
-  database:
-    image: postgres:15
-    environment:
-      POSTGRES_DB: blogtubeai
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-```
-
-### Development with Docker
-
-```bash
-# Start development environment
-docker-compose up -d
-
-# View backend logs
-docker-compose logs -f backend
-
-# Execute commands in container
-docker-compose exec backend python scripts/migrate.py
-
-# Rebuild after changes
-docker-compose build backend
-docker-compose up -d backend
-```
-
-## API Documentation
-
-### Interactive Documentation
-
-- **Swagger UI**: `http://localhost:8000/docs`
-- **ReDoc**: `http://localhost:8000/redoc`
+</div>
 - **OpenAPI Spec**: `http://localhost:8000/openapi.json`
 
 ### API Endpoints Overview
