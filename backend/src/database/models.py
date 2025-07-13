@@ -31,7 +31,7 @@ class Job(Base):
     error_code = Column(String)
     retry_count = Column(Integer, default=0)
     max_retries = Column(Integer, default=3)
-    metadata = Column(JSON)
+    job_metadata = Column(JSON)
     
     # File paths
     transcript_file_path = Column(String)
