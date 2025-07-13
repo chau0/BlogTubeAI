@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock, patch
 from fastapi.testclient import TestClient
 from fastapi import HTTPException
 
-from src.main import app
+from main import app  # Changed from 'src.main' to 'main'
 from src.services.video_service import VideoService
 
 
