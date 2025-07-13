@@ -1,419 +1,992 @@
-# Phase 2: Web Interface Implementation Plan
+# Phase 2: Frontend Design for BlogTubeAI Web Interface
 
-## Current State Analysis
+## Overview
+This document outlines the comprehensive frontend design for the React-based web interface that will provide an intuitive, user-friendly alternative to the CLI application. The frontend will be built using modern React patterns with TypeScript, focusing on performance, accessibility, and developer experience.
 
-### Existing Features (CLI-based)
-- ✅ YouTube URL parsing and validation (multiple formats)
-- ✅ Multi-language transcript extraction with fallback
-- ✅ Multi-LLM provider support (OpenAI, Claude, Gemini, Azure OpenAI)
-- ✅ Professional Markdown blog formatting with metadata
-- ✅ Rich CLI interface with progress indicators
-- ✅ Comprehensive error handling and logging
-- ✅ File management with safe naming conventions
-- ✅ Testing suite with 90%+ coverage
+## Table of Contents
 
-### Current Architecture
-Modular Python CLI application with these core components:
-- **`main.py`** - CLI entry point with Click framework
-- **`youtube_parser.py`** - URL validation and video ID extraction
-- **`transcript_handler.py`** - Transcript fetching with proxy support
-- **`llm_providers.py`** - Factory pattern for AI providers
-- **`blog_formatter.py`** - Markdown formatting with YAML frontmatter
-- **`utils.py`** - Helper functions for file operations
-
-### Phase 2 Target: Web Interface
-Based on the PRD and design documents, Phase 2 aims to create a **React + FastAPI** web application that makes the functionality accessible to non-technical users.
+1. [Technology Stack](#technology-stack)
+2. [Project Structure](#project-structure)
+3. [Component Architecture](#component-architecture)
+4. [State Management Strategy](#state-management-strategy)
+5. [Data Flow and API Integration](#data-flow-and-api-integration)
+6. [User Interface Design System](#user-interface-design-system)
+7. [Routing and Navigation](#routing-and-navigation)
+8. [Form Management](#form-management)
+9. [Real-time Communication](#real-time-communication)
+10. [Error Handling and Loading States](#error-handling-and-loading-states)
+11. [Performance Optimization](#performance-optimization)
+12. [Testing Strategy](#testing-strategy)
+13. [Build and Deployment](#build-and-deployment)
 
 ---
 
-## Detailed Implementation Plan
+## Technology Stack
 
-### Phase 2.1: Project Foundation & Setup
-**Timeline:** Days 1-2
+### Core Technologies
 
-#### Backend Infrastructure Setup
+**Build Tool: Vite**
+- Ultra-fast development server with HMR
+- Optimized production builds with tree-shaking
+- Native ES modules support
+- Plugin ecosystem for React and TypeScript
 
-##### Create FastAPI Web Layer
-- Create `backend/` directory structure with `src/web/` module
-- Initialize FastAPI application with proper CORS configuration
-- Set up environment variable management for web context
-- Configure SQLite database for job tracking and history storage
-- Create database models for `jobs`, `job_progress` tables using SQLAlchemy
+**Frontend Framework: React 18**
+- Modern hooks and concurrent features
+- Strict mode for development safety
+- Automatic batching for performance
+- Enhanced error boundaries
 
-##### Job Management System Design
-- Design UUID-based job identification system
-- Implement in-memory job queue with status tracking
-- Create background task processing pipeline using FastAPI BackgroundTasks
-- Set up job lifecycle management: `pending → processing → completed/failed`
-- Implement cleanup mechanisms for completed jobs and temporary files
+**Type System: TypeScript**
+- Strict type checking configuration
+- Interface-driven development
+- Enhanced IDE support and refactoring
+- Compile-time error detection
 
-##### Database Schema Implementation
-- Create migration system for database schema evolution
-- Implement job tracking tables with proper indexing
-- Set up database connection pooling and session management
-- Create data models for job metadata, progress tracking, and results storage
+### UI and Styling
 
-#### Frontend Foundation Setup
+**Component Library: shadcn/ui**
+- Accessible components built on Radix UI
+- Customizable with CSS variables
+- TypeScript-first design
+- Copy-paste component architecture
 
-##### React Project Initialization
-- Create `frontend/` directory with Vite + React + TypeScript template
-- Configure Tailwind CSS with custom design tokens and theme
-- Install and configure shadcn/ui component library
-- Set up path aliases (`@`) for clean import statements
-- Configure TypeScript with strict mode and proper tsconfig
+**Styling: Tailwind CSS**
+- Utility-first CSS framework
+- Custom design system integration
+- Dark/light mode support
+- Responsive design utilities
 
-##### Development Environment Configuration
-- Set up Vite proxy for API and WebSocket connections during development
-- Configure hot module replacement for efficient development workflow
-- Install and configure ESLint, Prettier for code quality
-- Set up React Query for server state management
-- Create base router structure with React Router DOM
+**Icons: Lucide React**
+- Consistent icon system
+- Tree-shakeable imports
+- Customizable sizing and styling
+- Extensive icon collection
 
-##### Base Application Architecture
-- Create layout components (Header, Navigation, Footer)
-- Implement error boundary components for graceful error handling
-- Set up global state management patterns
-- Create utility functions for API communication
-- Establish TypeScript type definitions for API responses
+### State and Data Management
 
----
+**Server State: TanStack Query (React Query)**
+- Intelligent caching with stale-while-revalidate
+- Background refetching and synchronization
+- Optimistic updates for better UX
+- Built-in loading and error states
 
-### Phase 2.2: Core API Development
-**Timeline:** Days 3-4
+**Client State: React Hooks + Context**
+- Local component state with useState
+- Shared state with useContext
+- Form state with React Hook Form
+- URL state with React Router
 
-#### Video Processing Endpoints
+**Form Management: React Hook Form + Zod**
+- Performant forms with minimal re-renders
+- Schema-based validation with Zod
+- Type-safe form handling
+- Integration with UI components
 
-##### URL Validation API Implementation
-- **Endpoint:** `POST /api/videos/validate`
-- Integrate existing `youtube_parser.py` functionality
-- Return comprehensive video metadata (title, duration, thumbnail, channel info)
-- Implement caching layer for video metadata to reduce API calls
-- Add error handling for private videos, geo-restrictions, and invalid URLs
+### Development Tools
 
-##### Video Information and Language Detection
-- **Endpoint:** `GET /api/videos/{video_id}/info` for detailed video data
-- **Endpoint:** `GET /api/videos/{video_id}/languages`
-- Integrate existing `transcript_handler.py` for language detection
-- Return language availability with quality indicators (manual vs auto-generated)
-- Include translation availability and confidence scores
+**Code Quality:**
+- ESLint with React and TypeScript rules
+- Prettier for consistent formatting
+- Husky for pre-commit hooks
+- TypeScript strict mode
 
-##### Provider Management System
-- **Endpoint:** `GET /api/providers` listing available LLM providers
-- Implement provider capability detection and status checking
-- **Endpoint:** `POST /api/providers/validate` for API key validation
-- Return provider-specific information (rate limits, features, pricing tiers)
-- Implement secure storage and retrieval of API configurations
-
-#### Job Processing Infrastructure
-
-##### Job Creation and Management APIs
-- **Endpoint:** `POST /api/jobs` for conversion job creation
-- **Endpoint:** `GET /api/jobs/{job_id}` for real-time status checking
-- **Endpoint:** `DELETE /api/jobs/{job_id}` for job cancellation
-- **Endpoint:** `GET /api/jobs/{job_id}/download` for result retrieval
-- Add job history endpoints for user's past conversions
-
-##### Background Processing Pipeline
-- Integrate existing modules (parser, transcript, LLM, formatter) into async pipeline
-- Implement step-by-step progress tracking with database persistence
-- Create error recovery mechanisms with intelligent retry logic
-- Set up resource cleanup for failed or cancelled jobs
-- Implement rate limiting and quota management for API providers
+**Testing:**
+- Vitest for unit testing
+- Testing Library for component testing
+- Playwright for end-to-end testing
+- MSW for API mocking
 
 ---
 
-### Phase 2.3: WebSocket Real-time System
-**Timeline:** Days 5-6
+## Project Structure
 
-#### WebSocket Infrastructure
+### Folder Organization
 
-##### Real-time Communication Setup
-- **Endpoint:** WebSocket at `/ws/jobs/{job_id}`
-- Create connection management system with proper authentication
-- Set up message broadcasting for job progress updates
-- Implement heartbeat mechanism for connection health monitoring
-- Create connection pooling for multiple concurrent clients
-
-##### Progress Broadcasting System
-- Integrate WebSocket updates into job processing pipeline
-- Send real-time progress for each processing step
-- Include estimated time remaining and current operation details
-- Broadcast error states with detailed information for troubleshooting
-- Implement connection recovery and automatic reconnection
-
-##### Connection Management and Security
-- Implement proper WebSocket authentication and authorization
-- Set up rate limiting to prevent WebSocket abuse
-- Create graceful connection cleanup on job completion
-- Handle network interruptions and reconnection scenarios
-- Implement message queuing for offline periods
-
----
-
-### Phase 2.4: Frontend Core Components
-**Timeline:** Days 7-9
-
-#### URL Input and Validation Interface
-
-##### Video URL Input Component
-- Create responsive input component with real-time validation
-- Implement paste functionality with clipboard API integration
-- Add support for all YouTube URL formats (watch, embed, short links)
-- Create video preview card showing thumbnail, title, and metadata
-- Implement form validation with Zod schemas and error display
-
-##### Video Information Display
-- Design video preview card with comprehensive information
-- Show video statistics (duration, views, upload date)
-- Display channel information and verification status
-- Include video accessibility information (captions, language)
-- Add functionality to edit or change the selected video
-
-#### Configuration Selection Interface
-
-##### Language Selection Component
-- Create searchable dropdown with language flags and names
-- Group languages by availability (manual captions vs auto-generated)
-- Display language confidence scores and quality indicators
-- Implement keyboard navigation and accessibility features
-- Add intelligent language recommendation based on video content
-
-##### LLM Provider Selection Interface
-- Design provider comparison cards with feature highlights
-- Display real-time provider availability and health status
-- Show pricing information and rate limit status
-- Include provider-specific configuration options
-- Implement provider recommendation engine based on content type
-
-##### Advanced Configuration Options
-- Create collapsible sections for advanced settings
-- Implement custom prompt template selection
-- Add output format preferences (style, length, tone)
-- Include proxy configuration for restricted environments
-- Create configuration presets for common use cases
-
----
-
-### Phase 2.5: Real-time Progress and Job Management
-**Timeline:** Days 10-12
-
-#### Progress Visualization System
-
-##### Job Progress Component
-- Create multi-step progress indicator with smooth animations
-- Display current operation with detailed status information
-- Show estimated time remaining with dynamic updates
-- Include expandable details for technical users
-- Implement progress visualization for long-running operations
-
-##### WebSocket Integration Frontend
-- Create custom `useWebSocket` hook for connection management
-- Handle connection states (connecting, connected, disconnected, error)
-- Implement automatic reconnection with exponential backoff
-- Display connection status and health indicators to users
-- Create fallback to polling if WebSocket fails
-
-##### Job Control and Management
-- Implement job cancellation with confirmation dialog
-- Create job priority management for multiple concurrent jobs
-- Add job pause/resume functionality for long conversions
-- Implement job scheduling for batch processing
-- Create job cloning for similar conversions
-
-#### Error Handling and Recovery
-
-##### Comprehensive Error Display
-- Create user-friendly error messages with actionable solutions
-- Implement error categorization (user error, system error, API error)
-- Show detailed error logs for technical users
-- Include contact information and support links
-- Create error reporting functionality for bug tracking
-
-##### Recovery and Retry Mechanisms
-- Implement automatic retry for transient failures
-- Create manual retry options with different configurations
-- Add fallback provider selection on API failures
-- Implement partial recovery for multi-step failures
-- Create error prevention through better validation
-
----
-
-### Phase 2.6: Results and Output Management
-**Timeline:** Days 13-15
-
-#### Blog Preview and Editing System
-
-##### Blog Preview Component
-- Create syntax-highlighted Markdown preview with live rendering
-- Implement side-by-side edit and preview mode
-- Add rich text editor with Markdown support
-- Include word count, reading time, and SEO analysis
-- Create print-friendly formatting options
-
-##### Content Enhancement Tools
-- Implement content suggestions and improvements
-- Add SEO optimization recommendations
-- Create social media snippet generation
-- Include image placeholder suggestions
-- Add metadata editing capabilities
-
-#### Export and Download System
-
-##### Multiple Format Export
-- Implement Markdown export with proper formatting
-- Create HTML export with embedded styles
-- Add PDF generation with professional layouts
-- Include plain text export for simple use cases
-- Create custom format templates
-
-##### Download and Sharing Infrastructure
-- Create secure download URLs with expiration
-- Implement bulk download for multiple formats
-- Add download progress indicators for large files
-- Create email sharing with customizable templates
-- Implement direct publishing integrations (future-ready)
-
-##### Social Sharing and Distribution
-- Create social media sharing buttons with proper metadata
-- Generate shareable preview links with expiration
-- Implement QR code generation for mobile sharing
-- Add integration preparation for popular platforms
-- Create embeddable widgets for websites
-
----
-
-### Phase 2.7: History and Persistence
-**Timeline:** Days 16-17
-
-#### Conversion History Management
-
-##### Local Storage System
-- Implement client-side job history with efficient storage
-- Create history search and filtering capabilities
-- Add favorites and bookmarking functionality
-- Implement bulk operations (delete, export, share)
-- Create history export in various formats
-
-##### History Interface Design
-- Create responsive history table with sorting and pagination
-- Display comprehensive job metadata and status
-- Implement history item actions (rerun, clone, delete, share)
-- Add history statistics and usage analytics
-- Create history backup and restore functionality
-
-##### Data Management and Optimization
-- Implement storage size limits with intelligent cleanup
-- Create data compression for large history datasets
-- Add manual and automatic cleanup options
-- Include storage usage indicators and warnings
-- Implement data migration for future updates
-
----
-
-### Phase 2.8: Quality Assurance and Testing
-**Timeline:** Days 18-19
-
-#### Comprehensive Testing Implementation
-
-##### Backend Testing Suite
-- Create unit tests for all API endpoints with edge cases
-- Implement integration tests for job processing pipeline
-- Add WebSocket connection and message testing
-- Create load testing for concurrent user scenarios
-- Implement API contract testing with mock data
-
-##### Frontend Testing Framework
-- Create component tests with React Testing Library
-- Implement user interaction testing with user-event
-- Add WebSocket connection testing in components
-- Create end-to-end tests with Playwright
-- Implement visual regression testing for UI consistency
-
-##### Performance and Security Testing
-- Conduct performance benchmarking for all critical paths
-- Test memory usage and potential memory leaks
-- Implement security testing for API endpoints
-- Create accessibility testing with automated tools
-- Test cross-browser compatibility across major browsers
-
-#### User Experience Validation
-
-##### Usability Testing Protocol
-- Create user testing scenarios for complete workflows
-- Test with non-technical users to validate intuitiveness
-- Gather feedback on interface clarity and ease of use
-- Test mobile responsiveness across different devices
-- Validate accessibility compliance (WCAG 2.1 AA)
-
-##### Performance Optimization
-- Optimize bundle sizes and loading times
-- Implement code splitting for better performance
-- Add lazy loading for non-critical components
-- Optimize API response times and caching strategies
-- Implement progressive web app features
-
----
-
-### Phase 2.9: Deployment and DevOps
-**Timeline:** Days 20-21
-
-#### Production Preparation
-
-##### Build and Deployment Setup
-- Configure Vite for optimized production builds
-- Set up static asset serving through FastAPI
-- Implement environment-specific configuration management
-- Create Docker containers for frontend and backend
-- Set up docker-compose for local development and testing
-
-##### Infrastructure and Monitoring
-- Implement health checks for application monitoring
-- Set up logging aggregation and analysis
-- Create performance monitoring and alerting
-- Implement error tracking and reporting
-- Set up backup strategies for data persistence
-
-#### Continuous Integration and Deployment
-
-##### CI/CD Pipeline Implementation
-- Create GitHub Actions workflow for automated testing
-- Implement code quality checks (linting, type checking, formatting)
-- Set up security scanning and dependency vulnerability checks
-- Create automated deployment to staging environment
-- Implement production deployment with rollback capabilities
-
-##### Documentation and Maintenance
-- Create comprehensive API documentation with OpenAPI/Swagger
-- Write deployment and maintenance guides
-- Create user documentation and help system
-- Implement changelog and version management
-- Set up community contribution guidelines
-
----
-
-## Implementation Priorities and Dependencies
-
-### Critical Path Dependencies
-1. **Backend API → Frontend Components** - Core APIs must be functional before frontend integration
-2. **WebSocket Infrastructure → Real-time UI** - WebSocket system required for progress tracking
-3. **Job Management → History System** - Job tracking required before history implementation
-4. **Core Conversion → Advanced Features** - Basic conversion must work before adding enhancements
-
-### Risk Mitigation Strategies
-- **API Provider Failures** - Implement graceful degradation and provider fallbacks
-- **WebSocket Instability** - Create polling fallback for progress updates
-- **Complex Frontend State** - Use proven state management patterns and TypeScript
-- **Performance Issues** - Implement monitoring and optimization from day one
-- **User Experience Complexity** - Conduct regular usability testing throughout development
+```
+frontend/
+├── public/                           # Static assets
+│   ├── favicon.ico
+│   ├── logo.svg
+│   ├── manifest.json
+│   └── robots.txt
+│
+├── src/
+│   ├── components/                   # Reusable UI components
+│   │   ├── ui/                       # shadcn/ui base components
+│   │   │   ├── button.tsx
+│   │   │   ├── input.tsx
+│   │   │   ├── card.tsx
+│   │   │   ├── progress.tsx
+│   │   │   ├── select.tsx
+│   │   │   ├── badge.tsx
+│   │   │   ├── dialog.tsx
+│   │   │   ├── toast.tsx
+│   │   │   ├── radio-group.tsx
+│   │   │   ├── label.tsx
+│   │   │   ├── textarea.tsx
+│   │   │   ├── tabs.tsx
+│   │   │   ├── accordion.tsx
+│   │   │   ├── dropdown-menu.tsx
+│   │   │   ├── tooltip.tsx
+│   │   │   └── skeleton.tsx
+│   │   │
+│   │   ├── layout/                   # Layout components
+│   │   │   ├── AppLayout.tsx         # Main application layout
+│   │   │   ├── Header.tsx            # Site header with navigation
+│   │   │   ├── Sidebar.tsx           # Side navigation (future)
+│   │   │   ├── Footer.tsx            # Site footer
+│   │   │   ├── PageContainer.tsx     # Page wrapper with padding
+│   │   │   └── LoadingLayout.tsx     # Loading state layout
+│   │   │
+│   │   ├── video/                    # Video-related components
+│   │   │   ├── VideoUrlInput.tsx     # URL input with validation
+│   │   │   ├── VideoPreview.tsx      # Video metadata display
+│   │   │   ├── VideoThumbnail.tsx    # Thumbnail with fallback
+│   │   │   ├── LanguageSelector.tsx  # Language selection dropdown
+│   │   │   ├── VideoInfo.tsx         # Detailed video information
+│   │   │   └── UrlFormatHelper.tsx   # URL format guidance
+│   │   │
+│   │   ├── providers/                # LLM provider components
+│   │   │   ├── ProviderSelector.tsx  # Provider selection grid
+│   │   │   ├── ProviderCard.tsx      # Individual provider card
+│   │   │   ├── ProviderConfig.tsx    # Provider-specific config
+│   │   │   ├── ApiKeyInput.tsx       # API key input with validation
+│   │   │   ├── ProviderStatus.tsx    # Provider health indicator
+│   │   │   └── ModelSelector.tsx     # Model selection for provider
+│   │   │
+│   │   ├── jobs/                     # Job management components
+│   │   │   ├── JobProgress.tsx       # Real-time progress display
+│   │   │   ├── JobHistory.tsx        # Historical jobs list
+│   │   │   ├── JobCard.tsx           # Individual job summary
+│   │   │   ├── JobDetails.tsx        # Expandable job details
+│   │   │   ├── JobActions.tsx        # Job action buttons
+│   │   │   ├── ProgressIndicator.tsx # Progress bar component
+│   │   │   ├── StepIndicator.tsx     # Step-by-step progress
+│   │   │   └── JobFilters.tsx        # Filtering options
+│   │   │
+│   │   ├── results/                  # Results and output components
+│   │   │   ├── BlogPreview.tsx       # Blog content preview
+│   │   │   ├── BlogEditor.tsx        # Inline blog editing
+│   │   │   ├── ExportOptions.tsx     # Download format options
+│   │   │   ├── ShareDialog.tsx       # Social sharing modal
+│   │   │   ├── CodeHighlight.tsx     # Syntax highlighting
+│   │   │   ├── MarkdownRenderer.tsx  # Markdown to HTML
+│   │   │   └── WordCount.tsx         # Content statistics
+│   │   │
+│   │   ├── forms/                    # Form-related components
+│   │   │   ├── ConversionForm.tsx    # Main conversion form
+│   │   │   ├── FormStep.tsx          # Multi-step form wrapper
+│   │   │   ├── FormNavigation.tsx    # Step navigation controls
+│   │   │   ├── ValidationMessage.tsx # Form validation display
+│   │   │   ├── FieldWrapper.tsx      # Consistent field styling
+│   │   │   └── FormProgress.tsx      # Form completion indicator
+│   │   │
+│   │   ├── common/                   # Common utility components
+│   │   │   ├── ErrorBoundary.tsx     # Error boundary wrapper
+│   │   │   ├── LoadingSpinner.tsx    # Loading state indicator
+│   │   │   ├── EmptyState.tsx        # Empty state messages
+│   │   │   ├── ConfirmDialog.tsx     # Confirmation modal
+│   │   │   ├── CopyButton.tsx        # Copy to clipboard
+│   │   │   ├── SearchInput.tsx       # Search with debouncing
+│   │   │   ├── NotificationToast.tsx # Toast notification
+│   │   │   ├── FeatureFlag.tsx       # Feature toggle wrapper
+│   │   │   └── ErrorAlert.tsx        # Error message display
+│   │   │
+│   │   └── feedback/                 # User feedback components
+│   │       ├── FeedbackModal.tsx     # Feedback collection
+│   │       ├── RatingComponent.tsx   # Star rating input
+│   │       ├── SuggestionBox.tsx     # Improvement suggestions
+│   │       └── HelpTooltip.tsx       # Contextual help
+│   │
+│   ├── pages/                        # Page components
+│   │   ├── HomePage.tsx              # Landing page
+│   │   ├── ConvertPage.tsx           # Main conversion workflow
+│   │   ├── ProgressPage.tsx          # Job progress tracking
+│   │   ├── ResultsPage.tsx           # Conversion results
+│   │   ├── HistoryPage.tsx           # Conversion history
+│   │   ├── SettingsPage.tsx          # User preferences
+│   │   ├── HelpPage.tsx              # Documentation and help
+│   │   ├── NotFoundPage.tsx          # 404 error page
+│   │   └── ErrorPage.tsx             # General error page
+│   │
+│   ├── hooks/                        # Custom React hooks
+│   │   ├── api/                      # API-related hooks
+│   │   │   ├── useVideoValidation.ts # Video URL validation
+│   │   │   ├── useJobCreation.ts     # Job creation logic
+│   │   │   ├── useJobProgress.ts     # Job progress tracking
+│   │   │   ├── useJobHistory.ts      # Job history management
+│   │   │   ├── useProviders.ts       # Provider data fetching
+│   │   │   ├── useVideoInfo.ts       # Video metadata fetching
+│   │   │   └── useJobResults.ts      # Results fetching
+│   │   │
+│   │   ├── websocket/                # WebSocket hooks
+│   │   │   ├── useWebSocket.ts       # Base WebSocket hook
+│   │   │   ├── useJobUpdates.ts      # Job-specific updates
+│   │   │   ├── useConnectionStatus.ts # Connection monitoring
+│   │   │   └── useReconnection.ts    # Auto-reconnection logic
+│   │   │
+│   │   ├── storage/                  # Local storage hooks
+│   │   │   ├── useLocalStorage.ts    # Generic local storage
+│   │   │   ├── useJobHistory.ts      # Job history persistence
+│   │   │   ├── useUserPreferences.ts # User settings storage
+│   │   │   └── useFormPersistence.ts # Form state persistence
+│   │   │
+│   │   ├── ui/                       # UI-related hooks
+│   │   │   ├── useTheme.ts           # Dark/light mode
+│   │   │   ├── useToast.ts           # Toast notifications
+│   │   │   ├── useClipboard.ts       # Clipboard operations
+│   │   │   ├── useKeyboard.ts        # Keyboard shortcuts
+│   │   │   ├── useWindowSize.ts      # Responsive breakpoints
+│   │   │   └── useScrollPosition.ts  # Scroll tracking
+│   │   │
+│   │   └── form/                     # Form-related hooks
+│   │       ├── useMultiStepForm.ts   # Multi-step form logic
+│   │       ├── useFormValidation.ts  # Enhanced validation
+│   │       ├── useFormPersistence.ts # Auto-save form data
+│   │       └── useFieldFocus.ts      # Focus management
+│   │
+│   ├── lib/                          # Utility libraries
+│   │   ├── api/                      # API client and utilities
+│   │   │   ├── client.ts             # Axios client configuration
+│   │   │   ├── endpoints.ts          # API endpoint definitions
+│   │   │   ├── types.ts              # API request/response types
+│   │   │   ├── interceptors.ts       # Request/response interceptors
+│   │   │   ├── cache.ts              # API caching utilities
+│   │   │   └── error-handler.ts      # API error handling
+│   │   │
+│   │   ├── validation/               # Validation schemas
+│   │   │   ├── video.ts              # Video URL validation
+│   │   │   ├── job.ts                # Job creation validation
+│   │   │   ├── provider.ts           # Provider configuration
+│   │   │   ├── common.ts             # Common validation rules
+│   │   │   └── index.ts              # Validation exports
+│   │   │
+│   │   ├── utils/                    # Utility functions
+│   │   │   ├── string.ts             # String manipulation
+│   │   │   ├── date.ts               # Date formatting
+│   │   │   ├── file.ts               # File operations
+│   │   │   ├── url.ts                # URL manipulation
+│   │   │   ├── format.ts             # Number/text formatting
+│   │   │   ├── debounce.ts           # Debouncing utilities
+│   │   │   └── constants.ts          # Application constants
+│   │   │
+│   │   ├── storage/                  # Storage utilities
+│   │   │   ├── local-storage.ts      # Local storage wrapper
+│   │   │   ├── session-storage.ts    # Session storage wrapper
+│   │   │   ├── indexeddb.ts          # IndexedDB operations
+│   │   │   └── cache-manager.ts      # Client-side caching
+│   │   │
+│   │   └── websocket/                # WebSocket utilities
+│   │       ├── connection.ts         # Connection management
+│   │       ├── message-handler.ts    # Message processing
+│   │       ├── reconnection.ts       # Auto-reconnection logic
+│   │       └── event-types.ts        # WebSocket event types
+│   │
+│   ├── types/                        # TypeScript type definitions
+│   │   ├── api.ts                    # API-related types
+│   │   ├── job.ts                    # Job-related types
+│   │   ├── video.ts                  # Video-related types
+│   │   ├── provider.ts               # Provider-related types
+│   │   ├── user.ts                   # User-related types
+│   │   ├── websocket.ts              # WebSocket message types
+│   │   ├── form.ts                   # Form-related types
+│   │   ├── ui.ts                     # UI component types
+│   │   └── global.ts                 # Global type definitions
+│   │
+│   ├── styles/                       # Global styles and themes
+│   │   ├── globals.css               # Global CSS and Tailwind
+│   │   ├── components.css            # Component-specific styles
+│   │   ├── utilities.css             # Custom utility classes
+│   │   └── themes/                   # Theme configurations
+│   │       ├── light.css             # Light theme variables
+│   │       ├── dark.css              # Dark theme variables
+│   │       └── colors.css            # Color palette
+│   │
+│   ├── config/                       # Configuration files
+│   │   ├── env.ts                    # Environment variables
+│   │   ├── api.ts                    # API configuration
+│   │   ├── websocket.ts              # WebSocket configuration
+│   │   ├── storage.ts                # Storage configuration
+│   │   └── features.ts               # Feature flags
+│   │
+│   ├── context/                      # React Context providers
+│   │   ├── ThemeProvider.tsx         # Theme context
+│   │   ├── ToastProvider.tsx         # Toast notifications context
+│   │   ├── JobProvider.tsx           # Job state context
+│   │   ├── SettingsProvider.tsx      # User settings context
+│   │   └── ErrorProvider.tsx         # Error handling context
+│   │
+│   ├── App.tsx                       # Root application component
+│   ├── main.tsx                      # Application entry point
+│   ├── Router.tsx                    # Application routing
+│   └── vite-env.d.ts                 # Vite environment types
+│
+├── tests/                            # Test files
+│   ├── __mocks__/                    # Test mocks
+│   │   ├── api.ts                    # API mocking
+│   │   ├── websocket.ts              # WebSocket mocking
+│   │   └── localStorage.ts           # Storage mocking
+│   │
+│   ├── unit/                         # Unit tests
+│   │   ├── components/               # Component tests
+│   │   ├── hooks/                    # Hook tests
+│   │   ├── utils/                    # Utility tests
+│   │   └── validation/               # Validation tests
+│   │
+│   ├── integration/                  # Integration tests
+│   │   ├── user-flows/               # User workflow tests
+│   │   ├── api-integration/          # API integration tests
+│   │   └── websocket-flow/           # WebSocket flow tests
+│   │
+│   ├── e2e/                          # End-to-end tests
+│   │   ├── conversion-flow.spec.ts   # Main conversion workflow
+│   │   ├── error-handling.spec.ts    # Error scenarios
+│   │   ├── responsive.spec.ts        # Mobile/tablet testing
+│   │   └── accessibility.spec.ts     # A11y compliance
+│   │
+│   ├── setup.ts                      # Test setup configuration
+│   ├── test-utils.tsx                # Testing utilities
+│   └── fixtures/                     # Test data fixtures
+│       ├── video-data.json           # Sample video responses
+│       ├── job-data.json             # Sample job data
+│       └── provider-data.json        # Sample provider data
+│
+├── docs/                             # Component documentation
+│   ├── components/                   # Component documentation
+│   ├── hooks/                        # Hook documentation
+│   └── patterns/                     # Design patterns
+│
+├── .env.example                      # Environment variables template
+├── .env.local                        # Local environment variables
+├── .gitignore                        # Git ignore rules
+├── .eslintrc.json                    # ESLint configuration
+├── .prettierrc                       # Prettier configuration
+├── package.json                      # Dependencies and scripts
+├── tsconfig.json                     # TypeScript configuration
+├── tsconfig.node.json                # Node.js TypeScript config
+├── vite.config.ts                    # Vite configuration
+├── tailwind.config.js                # Tailwind CSS configuration
+├── postcss.config.js                 # PostCSS configuration
+├── components.json                   # shadcn/ui configuration
+├── vitest.config.ts                  # Vitest testing configuration
+├── playwright.config.ts              # Playwright E2E configuration
+└── README.md                         # Frontend documentation
+```
 
 ---
 
-## Success Metrics
+## Component Architecture
 
-| Category | Metric |
-|----------|--------|
-| **Functional** | Convert video to blog in under 2 minutes via web interface |
-| **Technical** | 95% successful conversion rate, sub-second real-time updates |
-| **User Experience** | Intuitive interface usable by non-technical users |
-| **Performance** | Page loads under 3 seconds, mobile-responsive design |
-| **Quality** | Comprehensive test coverage, accessibility compliance |
+### Design Principles
+
+**Component Hierarchy:**
+- **Pages**: Route-level components that orchestrate the user experience
+- **Features**: Business logic components that handle specific workflows
+- **UI Components**: Reusable interface elements with props-based customization
+- **Layout Components**: Structural components for consistent page organization
+
+**Component Patterns:**
+- **Composition over Inheritance**: Build complex UIs by combining simple components
+- **Single Responsibility**: Each component has one clear purpose
+- **Prop Interface Design**: Clear, type-safe interfaces with sensible defaults
+- **Error Boundaries**: Graceful error handling at component level
+
+### Key Component Categories
+
+#### 1. Layout Components
+
+**AppLayout Component:**
+```
+AppLayout
+├── Header (navigation, user menu, theme toggle)
+├── MainContent (page-specific content)
+├── Sidebar (optional, feature navigation)
+└── Footer (links, version info)
+```
+
+**Responsibilities:**
+- Consistent page structure across all routes
+- Theme provider integration
+- Global navigation state
+- Responsive layout adjustments
+- Error boundary for the entire application
+
+#### 2. Video Processing Components
+
+**VideoUrlInput Component:**
+- URL format validation with real-time feedback
+- Paste from clipboard functionality
+- URL format helper with examples
+- Integration with video validation API
+- Loading states during validation
+- Error display with suggestion messages
+
+**VideoPreview Component:**
+- Video thumbnail with fallback images
+- Video metadata display (title, duration, channel)
+- Video statistics when available
+- Action buttons for editing or proceeding
+- Responsive design for mobile devices
+
+**LanguageSelector Component:**
+- Searchable dropdown with country flags
+- Language categorization (manual vs auto-generated)
+- Confidence indicators for auto-generated transcripts
+- Keyboard navigation support
+- Language preview with sample text
+
+#### 3. Provider Management Components
+
+**ProviderSelector Component:**
+- Grid layout for provider comparison
+- Feature comparison matrix
+- Pricing and rate limit information
+- Provider health status indicators
+- Detailed configuration options per provider
+
+**ProviderCard Component:**
+- Provider branding and description
+- Capability badges and features
+- Configuration form integration
+- API key validation status
+- Real-time availability checking
+
+#### 4. Job Management Components
+
+**JobProgress Component:**
+- Multi-step progress visualization
+- Real-time status updates via WebSocket
+- Estimated time remaining calculation
+- Detailed step information with expandable details
+- Cancellation controls with confirmation
+- Error state display with retry options
+
+**JobHistory Component:**
+- Paginated job listing with filtering
+- Search functionality across job metadata
+- Sort options (date, status, provider)
+- Bulk actions (delete, export, retry)
+- Job status badges with color coding
+- Quick actions for each job
+
+#### 5. Results and Output Components
+
+**BlogPreview Component:**
+- Syntax-highlighted Markdown rendering
+- Side-by-side edit and preview modes
+- Word count and reading time estimates
+- Export format preview switching
+- Copy-to-clipboard functionality
+- Social media snippet generation
+
+**ExportOptions Component:**
+- Multiple format download options
+- Batch export capabilities
+- Custom formatting options
+- Preview before download
+- File size and format information
+- Direct publishing integrations (future)
+
+### Component Communication Patterns
+
+**Props Down, Events Up:**
+- Parent components pass data via props
+- Child components communicate via callback functions
+- Type-safe prop interfaces with TypeScript
+- Default prop values for optional configurations
+
+**Context for Shared State:**
+- Theme preferences across the application
+- User settings and configuration
+- Toast notification system
+- Global loading and error states
+
+**Custom Hooks for Logic:**
+- API integration logic separated from UI
+- WebSocket connection management
+- Form state and validation logic
+- Local storage operations
+
+---
+
+## State Management Strategy
+
+### State Categories
+
+**Server State (TanStack Query):**
+- Video metadata and validation results
+- Job progress and status information
+- Provider availability and configuration
+- Historical job data and results
+- API response caching and synchronization
+
+**Client State (React Hooks):**
+- Form input values and validation states
+- UI component states (modals, dropdowns)
+- Navigation and routing state
+- Local user preferences and settings
+
+**URL State (React Router):**
+- Current page and route parameters
+- Query parameters for filtering and searching
+- Navigation history and back button support
+- Deep linking to specific application states
+
+### Query Key Strategy
+
+**Hierarchical Query Keys:**
+```typescript
+const queryKeys = {
+  videos: {
+    all: ['videos'] as const,
+    detail: (id: string) => ['videos', id] as const,
+    languages: (id: string) => ['videos', id, 'languages'] as const,
+    validation: (url: string) => ['videos', 'validate', url] as const,
+  },
+  jobs: {
+    all: ['jobs'] as const,
+    detail: (id: string) => ['jobs', id] as const,
+    progress: (id: string) => ['jobs', id, 'progress'] as const,
+    history: (filters: JobFilters) => ['jobs', 'history', filters] as const,
+  },
+  providers: {
+    all: ['providers'] as const,
+    detail: (name: string) => ['providers', name] as const,
+    health: ['providers', 'health'] as const,
+  },
+} as const;
+```
+
+**Cache Management:**
+- Stale time configuration based on data volatility
+- Background refetching for critical data
+- Optimistic updates for immediate feedback
+- Cache invalidation on successful mutations
+
+### Form State Management
+
+**Multi-Step Form Strategy:**
+- Form state persistence across navigation
+- Validation on each step with immediate feedback
+- Progress indication with completion status
+- Resume functionality from any point in the process
+
+**Validation Strategy:**
+- Schema-based validation with Zod
+- Real-time validation with debounced input
+- Server-side validation integration
+- User-friendly error messages with suggestions
+
+---
+
+## Data Flow and API Integration
+
+### API Client Architecture
+
+**Axios Client Configuration:**
+- Base URL configuration for different environments
+- Request and response interceptors for common operations
+- Automatic token handling and refresh logic
+- Request timeout and retry configuration
+- Error handling with user-friendly messages
+
+**Request/Response Flow:**
+```
+Component → Custom Hook → API Client → Backend API
+    ↓           ↓            ↓            ↓
+  UI Update ← Query Cache ← Response ← JSON Response
+```
+
+### Data Fetching Patterns
+
+**Query Hooks for Data Fetching:**
+- Automatic loading and error states
+- Background refetching with stale-while-revalidate
+- Intelligent caching with configurable stale time
+- Dependent queries with proper sequencing
+- Infinite queries for paginated data
+
+**Mutation Hooks for Data Updates:**
+- Optimistic updates for immediate feedback
+- Automatic cache invalidation on success
+- Rollback functionality on failure
+- Loading states during mutation execution
+- Success and error callback handling
+
+### WebSocket Integration
+
+**Real-time Data Updates:**
+- Job progress updates with detailed step information
+- Connection status monitoring with visual indicators
+- Automatic reconnection with exponential backoff
+- Message queuing during disconnection periods
+- Type-safe message handling with validation
+
+**WebSocket Message Types:**
+```typescript
+type WebSocketMessage = 
+  | { type: 'job_progress'; jobId: string; step: string; progress: number }
+  | { type: 'job_completed'; jobId: string; result: JobResult }
+  | { type: 'job_failed'; jobId: string; error: JobError }
+  | { type: 'connection_status'; status: 'connected' | 'disconnected' }
+  | { type: 'heartbeat'; timestamp: number };
+```
+
+---
+
+## User Interface Design System
+
+### Design Tokens
+
+**Color Palette:**
+- Primary colors for branding and key actions
+- Semantic colors for success, warning, error states
+- Neutral grays for text and backgrounds
+- High contrast ratios for accessibility compliance
+
+**Typography Scale:**
+- Consistent font sizes with proper line heights
+- Font weight variations for hierarchy
+- Responsive typography with fluid scaling
+- Code font for technical content display
+
+**Spacing System:**
+- 8px base unit for consistent spacing
+- Responsive spacing with breakpoint adjustments
+- Component-specific spacing tokens
+- Margin and padding utilities
+
+### Component Design Patterns
+
+**Card-Based Layout:**
+- Consistent card styling across the application
+- Hover states and interactive feedback
+- Responsive card grids and layouts
+- Card composition for complex interfaces
+
+**Form Design:**
+- Consistent field styling and spacing
+- Clear visual hierarchy for form sections
+- Inline validation with immediate feedback
+- Accessibility-compliant labeling and descriptions
+
+**Navigation Patterns:**
+- Breadcrumb navigation for deep workflows
+- Tab navigation for related content sections
+- Progressive disclosure for complex configurations
+- Mobile-first navigation with hamburger menu
+
+### Responsive Design Strategy
+
+**Breakpoint System:**
+- Mobile-first responsive design approach
+- Tailwind CSS breakpoint utilities
+- Container queries for component-level responsiveness
+- Adaptive layouts based on content and screen size
+
+**Mobile Optimization:**
+- Touch-friendly interactive elements
+- Optimized form layouts for mobile input
+- Simplified navigation and reduced cognitive load
+- Performance optimization for slower connections
+
+---
+
+## Routing and Navigation
+
+### Route Structure
+
+**Application Routes:**
+```
+/ (HomePage)
+├── /convert (ConvertPage)
+│   ├── /convert/url (URL input step)
+│   ├── /convert/config (Configuration step)
+│   ├── /convert/progress/:jobId (Progress tracking)
+│   └── /convert/results/:jobId (Results display)
+├── /history (HistoryPage)
+├── /settings (SettingsPage)
+├── /help (HelpPage)
+└── /404 (NotFoundPage)
+```
+
+**Route Protection:**
+- Protected routes for authenticated features (future)
+- Redirect logic for incomplete workflows
+- Route guards for job-specific pages
+- Deep linking with proper state restoration
+
+### Navigation State Management
+
+**Navigation Context:**
+- Current step tracking in multi-step workflows
+- Breadcrumb generation based on route hierarchy
+- Back button functionality with state preservation
+- Navigation history for user workflow tracking
+
+**URL State Synchronization:**
+- Query parameters for filter and search states
+- Hash routing for single-page sections
+- Browser history integration with proper back/forward
+- Deep linking support for shareable URLs
+
+---
+
+## Form Management
+
+### Multi-Step Form Architecture
+
+**Step Management:**
+- Linear and non-linear step progression
+- Step validation before navigation
+- Form state persistence across steps
+- Progress indication with completion status
+
+**Form State Persistence:**
+- Local storage for form draft saving
+- Session storage for temporary state
+- URL state for shareable form configurations
+- Auto-save functionality with conflict resolution
+
+### Validation Strategy
+
+**Client-Side Validation:**
+- Real-time validation with debounced input
+- Schema-based validation with Zod
+- Custom validation rules for business logic
+- Accessible error messaging with screen reader support
+
+**Server-Side Integration:**
+- API validation for external dependencies
+- Conflict resolution for concurrent modifications
+- Validation error mapping from server responses
+- Optimistic validation with server confirmation
+
+### Form Component Patterns
+
+**Field Components:**
+- Consistent field wrapper with label and error display
+- Input components with proper type handling
+- Select components with search and filtering
+- File upload components with progress tracking
+
+**Form Layout:**
+- Responsive form layouts with proper spacing
+- Field grouping with visual separation
+- Conditional field rendering based on selections
+- Form section navigation with anchor links
+
+---
+
+## Real-time Communication
+
+### WebSocket Architecture
+
+**Connection Management:**
+- Automatic connection establishment on page load
+- Connection status monitoring with visual feedback
+- Graceful handling of connection drops
+- Manual reconnection controls for user intervention
+
+**Message Handling:**
+- Type-safe message parsing with validation
+- Message queuing during disconnection periods
+- Duplicate message detection and filtering
+- Error handling for malformed messages
+
+### Real-time Features
+
+**Job Progress Updates:**
+- Step-by-step progress with detailed information
+- Estimated time remaining calculations
+- Real-time log streaming for technical users
+- Progress visualization with smooth animations
+
+**Live Status Indicators:**
+- Provider availability status updates
+- System health monitoring displays
+- User activity indicators (future multi-user features)
+- Real-time notification delivery
+
+### Offline Support
+
+**Connection Resilience:**
+- Graceful degradation when WebSocket unavailable
+- Fallback to polling for critical updates
+- Offline indicator with retry functionality
+- Data synchronization on reconnection
+
+---
+
+## Error Handling and Loading States
+
+### Error Boundary Strategy
+
+**Component-Level Error Boundaries:**
+- Page-level error boundaries for route protection
+- Feature-level boundaries for isolated failures
+- Component-level boundaries for graceful degradation
+- Error reporting integration for debugging
+
+**Error Classification:**
+- Network errors with retry mechanisms
+- Validation errors with user guidance
+- Server errors with fallback options
+- Client errors with recovery suggestions
+
+### Loading State Management
+
+**Progressive Loading:**
+- Skeleton screens for content placeholders
+- Progressive enhancement with lazy loading
+- Incremental data loading with pagination
+- Background loading with cache-first strategies
+
+**Loading Indicators:**
+- Contextual loading spinners for specific actions
+- Progress bars for long-running operations
+- Loading overlays for blocking operations
+- Micro-interactions for immediate feedback
+
+### User Feedback Systems
+
+**Toast Notifications:**
+- Success confirmations for completed actions
+- Warning messages for potential issues
+- Error notifications with retry options
+- Informational messages for user guidance
+
+**Inline Feedback:**
+- Form validation messages with suggestions
+- Real-time status updates for ongoing operations
+- Contextual help and guidance tooltips
+- Progressive disclosure for complex features
+
+---
+
+## Performance Optimization
+
+### Bundle Optimization
+
+**Code Splitting:**
+- Route-based code splitting with React.lazy
+- Component-based splitting for large features
+- Dynamic imports for optional functionality
+- Vendor bundle separation for better caching
+
+**Tree Shaking:**
+- ES modules for optimal tree shaking
+- Selective imports from large libraries
+- Unused code elimination in production builds
+- Bundle analysis and optimization recommendations
+
+### Runtime Performance
+
+**React Optimization:**
+- Memoization with React.memo and useMemo
+- Callback stabilization with useCallback
+- Virtual scrolling for large lists
+- Debounced input handling for performance
+
+**Caching Strategy:**
+- Service worker for static asset caching
+- API response caching with TanStack Query
+- Image optimization with modern formats
+- CDN integration for static assets
+
+### Memory Management
+
+**Resource Cleanup:**
+- Effect cleanup in useEffect hooks
+- WebSocket connection cleanup on unmount
+- Event listener removal and cleanup
+- Memory leak detection and prevention
+
+---
+
+## Testing Strategy
+
+### Testing Pyramid
+
+**Unit Tests (70%):**
+- Individual component testing with isolated props
+- Custom hook testing with act and renderHook
+- Utility function testing with edge cases
+- Validation schema testing with various inputs
+
+**Integration Tests (20%):**
+- Component interaction testing with user events
+- API integration testing with mock service worker
+- Form submission and validation flow testing
+- WebSocket connection and message handling
+
+**End-to-End Tests (10%):**
+- Complete user workflow testing
+- Cross-browser compatibility testing
+- Performance testing under various conditions
+- Accessibility compliance testing
+
+### Testing Tools and Patterns
+
+**Testing Library Approach:**
+- Query by accessibility roles and labels
+- User-centric testing approach
+- Event simulation with fireEvent and userEvent
+- Async testing with waitFor and findBy queries
+
+**Mock Strategies:**
+- API mocking with Mock Service Worker
+- WebSocket mocking for real-time features
+- Local storage mocking for persistence testing
+- Timer mocking for time-based functionality
+
+---
+
+## Build and Deployment
+
+### Development Environment
+
+**Development Server:**
+- Vite development server with hot module replacement
+- Proxy configuration for API and WebSocket connections
+- Environment variable management for development
+- Source map generation for debugging
+
+**Development Tools:**
+- TypeScript compilation with strict checking
+- ESLint integration with IDE support
+- Prettier formatting with pre-commit hooks
+- Browser developer tools integration
+
+### Production Build
+
+**Build Optimization:**
+- Minification and compression for smaller bundles
+- Asset optimization with modern image formats
+- CSS purging for reduced stylesheet size
+- Progressive web app features for offline support
+
+**Deployment Strategy:**
+- Static file generation for CDN deployment
+- Environment-specific configuration management
+- Cache busting with content hashing
+- Health check endpoints for monitoring
+
+### Continuous Integration
+
+**Automated Testing:**
+- Unit and integration test execution
+- End-to-end test execution with multiple browsers
+- Performance testing and bundle size monitoring
+- Accessibility testing with automated tools
+
+**Quality Assurance:**
+- Code coverage reporting and enforcement
+- Type checking with TypeScript compilation
+- Linting and formatting verification
+- Security scanning for dependencies
+
+---
+
+This comprehensive frontend design provides a solid foundation for building a modern, performant, and user-friendly React application that seamlessly integrates with the FastAPI backend while maintaining the robust functionality of the existing CLI application.
