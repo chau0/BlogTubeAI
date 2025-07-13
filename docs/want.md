@@ -1,2 +1,3 @@
 - use langgraph canvas editor
 - apply the deep research
+- call image generation API to insert images to blog
