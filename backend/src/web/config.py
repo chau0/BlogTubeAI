@@ -1,4 +1,4 @@
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
 from functools import lru_cache
 from typing import List
 
@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     api_workers: int = 1
     
     # CORS
-    cors_origins: List[str] = ["http://localhost:3000"]
+    cors_origins: List[str] = ["http://localhost:3000", "http://127.0.0.1:3000"]
     cors_credentials: bool = True
     cors_methods: List[str] = ["*"]
     cors_headers: List[str] = ["*"]
@@ -26,18 +26,31 @@ class Settings(BaseSettings):
     rate_limit_window: int = 60
     
     # Database
-    database_url: str = "sqlite:///./blogtube.db"
+    database_url: str = "sqlite+aiosqlite:///./blogtube.db"
     database_echo: bool = False
     
-    # Redis (for caching and WebSocket)
+    # Redis (for caching and WebSocket - optional)
     redis_url: str = "redis://localhost:6379"
     
     # Security
-    secret_key: str = "your-secret-key-change-in-production"
+    secret_key: str = "dev-secret-key-change-in-production"
     access_token_expire_minutes: int = 30
     
-    class Config:
-        env_file = ".env"
+    # Job Processing
+    max_concurrent_jobs: int = 5
+    job_timeout_minutes: int = 30
+    
+    # File Storage
+    output_directory: str = "output"
+    transcript_directory: str = "transcripts"
+    temp_directory: str = "temp"
+    
+    # LLM API Keys (optional)
+    openai_api_key: str = ""
+    anthropic_api_key: str = ""
+    google_api_key: str = ""
+    
+    model_config = {"env_file": ".env"}
 
 
 @lru_cache()
