@@ -90,7 +90,7 @@ python-dotenv==1.0.0
     #   uvicorn
 python-jose[cryptography]==3.3.0
     # via -r requirements/base.in
-python-multipart==0.0.6
+python-multipart==0.0.18
     # via -r requirements/base.in
 pyyaml==6.0.2
     # via uvicorn
