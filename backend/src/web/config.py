@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     # Environment
     environment: str = "development"
     debug: bool = True
+    log_level: str = "INFO"
     
     # API
     api_host: str = "localhost"

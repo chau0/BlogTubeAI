@@ -3,19 +3,19 @@ from sqlalchemy.orm import Session
 from typing import List
 
 from ...database.connection import get_db
-from ...models.schemas import ProviderResponse, ProviderConfig
+from ...models.schemas import ProviderInfo
 from ...services.provider_service import ProviderService
 
 router = APIRouter()
 
 
-@router.get("/", response_model=List[ProviderResponse])
+@router.get("/", response_model=List[ProviderInfo])
 async def list_providers():
     """List available LLM providers"""
     provider_service = ProviderService()
-    providers = provider_service.get_available_providers()
+    providers = await provider_service.get_all_providers()
     
-    return [ProviderResponse(**provider) for provider in providers]
+    return providers
 
 
 @router.get("/{provider_name}/models")
@@ -24,19 +24,19 @@ async def list_provider_models(provider_name: str):
     provider_service = ProviderService()
     
     try:
-        models = provider_service.get_provider_models(provider_name)
+        models = await provider_service.get_provider_models(provider_name)
         return {"models": models}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.post("/{provider_name}/test")
-async def test_provider_connection(provider_name: str, config: ProviderConfig):
+async def test_provider_connection(provider_name: str):
     """Test connection to LLM provider"""
     provider_service = ProviderService()
     
     try:
-        result = provider_service.test_connection(provider_name, config.dict())
+        result = await provider_service.test_provider_connection(provider_name)
         return {"status": "success", "result": result}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

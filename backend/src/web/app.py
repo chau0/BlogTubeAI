@@ -119,3 +119,5 @@ async def start_background_tasks():
             # Log error but don't crash the background task
             print(f"Background task error: {e}")
             await asyncio.sleep(300)
+
+app = create_app()
