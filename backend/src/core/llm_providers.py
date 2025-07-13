@@ -88,7 +88,7 @@ class OpenAIProvider(LLMProvider):
             prompt = self.create_blog_prompt(transcript, title, url)
             
             response = self.client.chat.completions.create(
-                model="gpt-4",
+                model="gpt-4.1",
                 messages=[
                     {"role": "system", "content": "You are an expert content writer who creates engaging blog posts from video transcripts."},
                     {"role": "user", "content": prompt}
@@ -126,7 +126,7 @@ class AzureOpenAIProvider(LLMProvider):
         )
         
         # Use deployment name from environment, default to gpt-4
-        self.deployment_name = os.getenv('AZURE_OPENAI_DEPLOYMENT_NAME', 'gpt-4')
+        self.deployment_name = os.getenv('AZURE_OPENAI_DEPLOYMENT_NAME', 'gpt-4.1')
     
     def generate_blog(self, transcript: str, title: str, url: str) -> Optional[str]:
         """Generate blog using Azure OpenAI."""

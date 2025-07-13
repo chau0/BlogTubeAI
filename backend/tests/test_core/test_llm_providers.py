@@ -4,7 +4,14 @@ Unit tests for LLM Providers (F04)
 
 import pytest
 from unittest.mock import patch, Mock, MagicMock
-from backend.src.core.llm_providers import LLMProvider, OpenAIProvider, AzureOpenAIProvider, ClaudeProvider, GeminiProvider, LLMProviderFactory
+import sys
+
+# Mock the LLM provider modules before importing
+sys.modules['openai'] = MagicMock()
+sys.modules['anthropic'] = MagicMock()
+sys.modules['google.generativeai'] = MagicMock()
+
+from src.core.llm_providers import LLMProvider, OpenAIProvider, AzureOpenAIProvider, ClaudeProvider, GeminiProvider, LLMProviderFactory
 
 
 class TestLLMProvider:
@@ -30,7 +37,7 @@ class TestOpenAIProvider:
     """Test OpenAI provider functionality."""
     
     @patch.dict('os.environ', {'OPENAI_API_KEY': 'test-key'})
-    @patch('src.llm_providers.openai')
+    @patch('src.core.llm_providers.openai')
     def test_initialization(self, mock_openai):
         """Test OpenAI provider initialization."""
         mock_openai.OpenAI.return_value = Mock()
@@ -44,7 +51,7 @@ class TestOpenAIProvider:
                 OpenAIProvider()
     
     @patch.dict('os.environ', {'OPENAI_API_KEY': 'test-key'})
-    @patch('src.llm_providers.openai')
+    @patch('src.core.llm_providers.openai')
     def test_generate_blog_success(self, mock_openai):
         """Test successful blog generation."""
         mock_client = Mock()
@@ -60,7 +67,7 @@ class TestOpenAIProvider:
         assert result == "Generated blog content"
     
     @patch.dict('os.environ', {'OPENAI_API_KEY': 'test-key'})
-    @patch('src.llm_providers.openai')
+    @patch('src.core.llm_providers.openai')
     def test_generate_blog_failure(self, mock_openai):
         """Test blog generation failure handling."""
         mock_client = Mock()
@@ -81,7 +88,7 @@ class TestAzureOpenAIProvider:
         'AZURE_OPENAI_ENDPOINT': 'https://test.openai.azure.com/',
         'AZURE_OPENAI_DEPLOYMENT_NAME': 'gpt-4-deployment'
     })
-    @patch('src.llm_providers.openai')
+    @patch('src.core.llm_providers.openai')
     def test_initialization(self, mock_openai):
         """Test Azure OpenAI provider initialization."""
         mock_openai.AzureOpenAI.return_value = Mock()
@@ -105,7 +112,7 @@ class TestAzureOpenAIProvider:
         'AZURE_OPENAI_API_KEY': 'test-key',
         'AZURE_OPENAI_ENDPOINT': 'https://test.openai.azure.com/'
     })
-    @patch('src.llm_providers.openai')
+    @patch('src.core.llm_providers.openai')
     def test_default_deployment_name(self, mock_openai):
         """Test default deployment name when not specified."""
         mock_openai.AzureOpenAI.return_value = Mock()
@@ -117,7 +124,7 @@ class TestAzureOpenAIProvider:
         'AZURE_OPENAI_ENDPOINT': 'https://test.openai.azure.com/',
         'AZURE_OPENAI_DEPLOYMENT_NAME': 'custom-deployment'
     })
-    @patch('src.llm_providers.openai')
+    @patch('src.core.llm_providers.openai')
     def test_generate_blog_success(self, mock_openai):
         """Test successful blog generation with Azure OpenAI."""
         mock_client = Mock()
@@ -137,7 +144,7 @@ class TestAzureOpenAIProvider:
         'AZURE_OPENAI_API_KEY': 'test-key',
         'AZURE_OPENAI_ENDPOINT': 'https://test.openai.azure.com/'
     })
-    @patch('src.llm_providers.openai')
+    @patch('src.core.llm_providers.openai')
     def test_generate_blog_failure(self, mock_openai):
         """Test blog generation failure handling."""
         mock_client = Mock()
@@ -154,7 +161,7 @@ class TestClaudeProvider:
     """Test Claude provider functionality."""
     
     @patch.dict('os.environ', {'ANTHROPIC_API_KEY': 'test-key'})
-    @patch('src.llm_providers.anthropic')
+    @patch('src.core.llm_providers.anthropic')
     def test_initialization(self, mock_anthropic):
         """Test Claude provider initialization."""
         mock_anthropic.Anthropic.return_value = Mock()
@@ -162,7 +169,7 @@ class TestClaudeProvider:
         assert provider.client is not None
     
     @patch.dict('os.environ', {'ANTHROPIC_API_KEY': 'test-key'})
-    @patch('src.llm_providers.anthropic')
+    @patch('src.core.llm_providers.anthropic')
     def test_generate_blog_success(self, mock_anthropic):
         """Test successful blog generation with Claude."""
         mock_client = Mock()
@@ -182,7 +189,7 @@ class TestGeminiProvider:
     """Test Gemini provider functionality."""
     
     @patch.dict('os.environ', {'GOOGLE_API_KEY': 'test-key'})
-    @patch('src.llm_providers.genai')
+    @patch('src.core.llm_providers.genai')
     def test_initialization(self, mock_genai):
         """Test Gemini provider initialization."""
         mock_model = Mock()
@@ -192,7 +199,7 @@ class TestGeminiProvider:
         assert provider.model is not None
     
     @patch.dict('os.environ', {'GOOGLE_API_KEY': 'test-key'})
-    @patch('src.llm_providers.genai')
+    @patch('src.core.llm_providers.genai')
     def test_generate_blog_success(self, mock_genai):
         """Test successful blog generation with Gemini."""
         mock_model = Mock()
@@ -211,7 +218,7 @@ class TestLLMProviderFactory:
     """Test LLM provider factory."""
     
     @patch.dict('os.environ', {'OPENAI_API_KEY': 'test-key'})
-    @patch('src.llm_providers.openai')
+    @patch('src.core.llm_providers.openai')
     def test_create_openai_provider(self, mock_openai):
         """Test creating OpenAI provider."""
         mock_openai.OpenAI.return_value = Mock()
@@ -222,7 +229,7 @@ class TestLLMProviderFactory:
         'AZURE_OPENAI_API_KEY': 'test-key',
         'AZURE_OPENAI_ENDPOINT': 'https://test.openai.azure.com/'
     })
-    @patch('src.llm_providers.openai')
+    @patch('src.core.llm_providers.openai')
     def test_create_azureopenai_provider(self, mock_openai):
         """Test creating Azure OpenAI provider."""
         mock_openai.AzureOpenAI.return_value = Mock()

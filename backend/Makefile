@@ -82,3 +82,40 @@ format:
 lint:
 	@echo "Running linter..."
 	flake8 $(SRC_DIR) $(TEST_DIR) --max-line-length=88
+
+# =============================================================================
+# Dependency Management
+# =============================================================================
+
+.PHONY: compile-deps
+compile-deps:
+	@echo "Compiling dependencies..."
+	pip-compile requirements/base.in
+	pip-compile requirements/dev.in
+	pip-compile requirements/test.in
+	pip-compile requirements/web.in
+
+.PHONY: sync-deps
+sync-deps:
+	@echo "Syncing dependencies..."
+	pip-sync requirements/dev.txt
+
+.PHONY: upgrade-deps
+upgrade-deps:
+	@echo "Upgrading dependencies..."
+	pip-compile --upgrade requirements/base.in
+	pip-compile --upgrade requirements/dev.in
+	pip-compile --upgrade requirements/test.in
+	pip-compile --upgrade requirements/web.in
+
+.PHONY: setup-dev
+setup-dev: compile-deps sync-deps
+	@echo "✅ Development environment setup complete!"
+
+# Update existing setup target
+.PHONY: setup
+setup:
+	@echo "Setting up backend environment..."
+	pip install pip-tools
+	pip-sync requirements/base.txt
+	@echo "✅ Backend setup complete!"

@@ -77,11 +77,15 @@ backend/
 │   ├── conftest.py                    # Test configuration
 │   └── fixtures/                      # Test data
 │
-├── requirements/                       # Dependency Management
-│   ├── base.txt                       # Core dependencies
-│   ├── web.txt                        # Web-specific dependencies
-│   ├── dev.txt                        # Development dependencies
-│   └── test.txt                       # Testing dependencies
+├── requirements/                       # 🔧 Dependency Management (pip-compile)
+│   ├── base.in                        # Core dependency specifications
+│   ├── base.txt                       # Locked core dependencies
+│   ├── web.in                         # Web-specific dependencies
+│   ├── web.txt                        # Locked web dependencies  
+│   ├── dev.in                         # Development dependencies
+│   ├── dev.txt                        # Locked dev dependencies
+│   ├── test.in                        # Testing dependencies
+│   └── test.txt                       # Locked test dependencies
 │
 ├── scripts/                           # Utility Scripts
 │   ├── start_dev.py                   # Development server
@@ -93,6 +97,7 @@ backend/
 ├── output/                            # Generated Content
 ├── .env.example                       # Environment template
 ├── alembic.ini                        # Database migration config
+├── requirements.txt                   # 🎯 Production dependencies (-r requirements/base.txt)
 ├── Makefile                           # Development commands
 └── README.md                          # This file
 ```
@@ -102,7 +107,7 @@ backend/
 ### Prerequisites
 
 - **Python 3.9+** (Python 3.11+ recommended)
-- **pip** package manager
+- **pip** package manager with **pip-tools** for dependency management
 - **SQLite** (included with Python) or **PostgreSQL** (optional)
 
 ### 1. Setup Backend Environment
@@ -111,11 +116,12 @@ backend/
 # From project root
 cd backend
 
-# Setup backend development environment
-make setup
+# Setup backend development environment (includes pip-tools)
+make setup-dev
 
 # Or manual setup
-pip install -r requirements/dev.txt
+pip install pip-tools
+pip-sync requirements/dev.txt
 ```
 
 ### 2. Configure Environment
@@ -178,9 +184,35 @@ make run-dev
 ### **Core Development**
 ```bash
 make help              # Show all available commands
-make setup             # Complete development environment setup
+make setup             # Production environment setup
+make setup-dev         # Complete development environment setup
 make run-dev           # Start FastAPI development server
 make run-cli           # Run CLI application (using shared core modules)
+```
+
+### **Dependency Management** 🔧
+```bash
+make compile-deps      # Compile all .in files to locked .txt files
+make sync-deps         # Sync installed packages with dev.txt
+make upgrade-deps      # Upgrade all dependencies to latest versions
+make setup-dev         # Complete setup including dependency compilation
+```
+
+#### **Dependency Workflow**
+```bash
+# Adding new dependencies
+echo "new-package" >> requirements/base.in    # Add to appropriate .in file
+make compile-deps                             # Compile to locked versions
+make sync-deps                                # Install new packages
+
+# Updating dependencies
+make upgrade-deps                             # Upgrade all to latest
+make sync-deps                                # Apply changes
+
+# Environment-specific installations
+pip-sync requirements/base.txt                # Production
+pip-sync requirements/dev.txt                 # Development 
+pip-sync requirements/test.txt                # Testing only
 ```
 
 ### **Testing**
@@ -214,6 +246,47 @@ make check-all         # Run all code quality checks
 make logs              # View recent application logs
 make shell             # Interactive Python shell with app context
 make clean             # Clean cache and temporary files
+```
+
+## 📦 Dependency Management
+
+This project uses **pip-tools** for reproducible dependency management:
+
+### **File Structure**
+- **`.in` files**: High-level dependency specifications (what you want)
+- **`.txt` files**: Locked dependencies with exact versions (what gets installed)
+
+```
+requirements/
+├── base.in          # Core production dependencies
+├── base.txt         # 🔒 Locked core dependencies  
+├── dev.in           # Development tools (includes base.in)
+├── dev.txt          # 🔒 Locked dev dependencies
+├── test.in          # Testing dependencies (includes base.in)
+├── test.txt         # 🔒 Locked test dependencies
+├── web.in           # Web-specific dependencies (includes base.in)
+└── web.txt          # 🔒 Locked web dependencies
+```
+
+### **Key Benefits**
+- **Reproducible builds**: Exact same versions across environments
+- **Security**: Pin transitive dependencies to avoid supply chain attacks  
+- **Separation**: Different dependency sets for different environments
+- **Easy updates**: Controlled dependency upgrades with `pip-compile --upgrade`
+
+### **Best Practices**
+```bash
+# Always edit .in files, never .txt files directly
+echo "requests>=2.28.0" >> requirements/base.in
+
+# Compile after changes
+make compile-deps
+
+# Sync to install
+make sync-deps
+
+# Commit both .in and .txt files to version control
+git add requirements/
 ```
 
 ## 🔧 API Documentation

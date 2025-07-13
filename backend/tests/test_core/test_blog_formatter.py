@@ -6,7 +6,7 @@ import pytest
 import tempfile
 import os
 from unittest.mock import patch, mock_open
-from backend.src.core.blog_formatter import format_as_blog, save_blog_to_file, create_blog_summary, validate_markdown
+from src.core.blog_formatter import format_as_blog, save_blog_to_file, create_blog_summary, validate_markdown
 
 
 class TestFormatAsBlog:
@@ -130,7 +130,7 @@ class TestValidateMarkdown:
     def test_valid_markdown(self):
         """Test validation of valid Markdown."""
         # read a sample Markdown content from a file
-        with open('tests/data/long_text_500word.md', 'r', encoding='utf-8') as f:
+        with open('tests/test_core/data/long_text_500word.md', 'r', encoding='utf-8') as f:
             content = f.read()
         assert validate_markdown(content) is True
     

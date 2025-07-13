@@ -1,0 +1,5 @@
+# Web-specific dependencies (if different from base)
+-r base.in
+
+# Additional web dependencies if needed
+# Add any web-specific packages here

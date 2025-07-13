@@ -1,0 +1,7 @@
+# Include base requirements for testing
+-r base.in
+
+# Testing dependencies
+pytest
+pytest-asyncio
+pytest-cov

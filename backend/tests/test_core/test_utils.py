@@ -5,7 +5,7 @@ Unit tests for Utilities (F07, F08)
 import pytest
 import tempfile
 import os
-from backend.src.core.utils import validate_url, create_safe_filename, ensure_directory_exists, get_file_size, truncate_text, clean_text
+from src.core.utils import validate_url, create_safe_filename, ensure_directory_exists, get_file_size, truncate_text, clean_text
 
 
 class TestValidateUrl:

@@ -1,0 +1,33 @@
+# Core web dependencies
+fastapi
+uvicorn[standard]
+pydantic
+pydantic-settings
+
+# Database
+sqlalchemy
+alembic
+aiosqlite
+
+# Background tasks and WebSocket
+python-multipart
+websockets
+
+# Security and middleware
+python-jose[cryptography]
+passlib[bcrypt]
+slowapi
+
+# HTTP client
+httpx
+aiofiles
+
+# YouTube and transcript handling
+requests
+youtube-transcript-api
+
+# Monitoring and logging
+structlog
+
+# Environment management
+python-dotenv

@@ -1,0 +1,16 @@
+# Include base requirements
+-r base.in
+
+# Testing
+pytest
+pytest-asyncio
+pytest-cov
+
+# Development tools
+black
+flake8
+mypy
+pre-commit
+
+# Additional dev tools
+pip-tools
