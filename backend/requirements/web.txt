@@ -1,0 +1,12 @@
+# Web-specific dependencies
+-r base.txt
+
+# Additional web features
+redis==5.0.1
+python-socketio==5.10.0
+
+# File handling
+python-magic==0.4.27
+
+# Email notifications (optional)
+fastapi-mail==1.4.1

@@ -1,40 +1,69 @@
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-from .manager import manager
-import logging
+"""WebSocket endpoint handlers"""
 
-logger = logging.getLogger(__name__)
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, HTTPException
+from typing import Optional
+
+from .manager import websocket_manager
+from ...core.job_manager import JobManager
 
 websocket_router = APIRouter()
+job_manager = JobManager()
 
 
-@websocket_router.websocket("/job/{job_id}")
+@websocket_router.websocket("/jobs/{job_id}")
 async def websocket_job_updates(websocket: WebSocket, job_id: str):
-    """WebSocket endpoint for job progress updates"""
-    await manager.connect(websocket, job_id)
+    """WebSocket endpoint for job status updates"""
+    
+    # Verify job exists
+    job = await job_manager.get_job(job_id)
+    if not job:
+        await websocket.close(code=4004, reason="Job not found")
+        return
+    
+    connection_id = None
+    try:
+        # Connect and register for updates
+        connection_id = await websocket_manager.connect(websocket, job_id)
+        
+        # Listen for messages
+        while True:
+            try:
+                message = await websocket.receive_text()
+                await websocket_manager.handle_message(connection_id, message)
+            except WebSocketDisconnect:
+                break
+            
+    except Exception as e:
+        # Log error and close connection
+        print(f"WebSocket error: {e}")
+        
+    finally:
+        # Clean up connection
+        if connection_id:
+            await websocket_manager.disconnect(connection_id)
+
+
+@websocket_router.websocket("/system")
+async def websocket_system_updates(websocket: WebSocket):
+    """WebSocket endpoint for system-wide updates"""
+    await websocket.accept()
     
     try:
-        # Send initial connection confirmation
-        await manager.send_personal_message({
-            "type": "connection",
-            "message": f"Connected to job {job_id}",
-            "job_id": job_id
-        }, websocket)
-        
-        # Keep connection alive and handle incoming messages
+        # Send system stats periodically
         while True:
-            data = await websocket.receive_text()
-            logger.info(f"Received message for job {job_id}: {data}")
+            stats = {
+                "type": "system_stats",
+                "data": {
+                    "active_jobs": job_manager.get_active_job_count(),
+                    "can_accept_jobs": job_manager.can_accept_new_job(),
+                    "websocket_stats": websocket_manager.get_connection_stats()
+                }
+            }
             
-            # Echo message back (for testing)
-            await manager.send_personal_message({
-                "type": "echo",
-                "message": data,
-                "job_id": job_id
-            }, websocket)
+            await websocket.send_json(stats)
+            await asyncio.sleep(30)  # Update every 30 seconds
             
     except WebSocketDisconnect:
-        manager.disconnect(websocket, job_id)
-        logger.info(f"WebSocket disconnected for job {job_id}")
+        pass
     except Exception as e:
-        logger.error(f"WebSocket error for job {job_id}: {e}")
-        manager.disconnect(websocket, job_id)
+        print(f"System WebSocket error: {e}")
