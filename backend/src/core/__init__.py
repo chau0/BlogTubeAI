@@ -1,11 +1,6 @@
-"""Core business logic modules"""
+"""
+YouTube to Blog Converter Package
+"""
 
-from .job_manager import JobManager
-from .cache_manager import CacheManager
-from .file_manager import FileManager
-
-__all__ = [
-    "JobManager",
-    "CacheManager",
-    "FileManager"
-]
+__version__ = "1.0.0"
+__author__ = "BlogForgeAI"

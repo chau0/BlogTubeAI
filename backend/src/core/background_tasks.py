@@ -15,18 +15,11 @@ from ..services.video_service import VideoService
 from ..services.provider_service import ProviderService
 from .file_manager import FileManager
 
-# Import existing CLI modules
-try:
-    from src.youtube_parser import YouTubeParser
-    from src.transcript_handler import TranscriptHandler
-    from src.llm_providers import LLMProviderFactory
-    from src.blog_formatter import BlogFormatter
-except ImportError:
-    # Fallback import paths
-    from ....src.youtube_parser import YouTubeParser
-    from ....src.transcript_handler import TranscriptHandler
-    from ....src.llm_providers import LLMProviderFactory
-    from ....src.blog_formatter import BlogFormatter
+from ..core.youtube_parser import get_video_id, get_video_title
+from ..core.transcript_handler import list_transcript_languages, fetch_transcript
+from ..core.llm_providers import LLMProviderFactory
+from ..core.blog_formatter import format_as_blog, save_blog_to_file
+from ..core.utils import validate_url, create_safe_filename
 
 
 class BackgroundTaskProcessor:

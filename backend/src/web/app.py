@@ -24,8 +24,8 @@ def create_app() -> FastAPI:
         title="BlogTubeAI API",
         description="Transform YouTube videos into engaging blog posts",
         version="1.0.0",
-        docs_url="/api/docs" if settings.environment != "production" else None,
-        redoc_url="/api/redoc" if settings.environment != "production" else None,
+        docs_url="/api/docs" ,
+        redoc_url="/api/redoc" ,
     )
     
     # Setup middleware

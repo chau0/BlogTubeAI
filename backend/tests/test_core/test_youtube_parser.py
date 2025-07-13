@@ -4,7 +4,7 @@ Unit tests for YouTube URL Parser (F01)
 
 import pytest
 from unittest.mock import patch, Mock
-from src.youtube_parser import get_video_id, get_video_title, get_video_info
+from backend.src.core.youtube_parser import get_video_id, get_video_title, get_video_info
 
 
 class TestGetVideoId:

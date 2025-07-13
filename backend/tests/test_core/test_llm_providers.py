@@ -4,7 +4,7 @@ Unit tests for LLM Providers (F04)
 
 import pytest
 from unittest.mock import patch, Mock, MagicMock
-from src.llm_providers import LLMProvider, OpenAIProvider, AzureOpenAIProvider, ClaudeProvider, GeminiProvider, LLMProviderFactory
+from backend.src.core.llm_providers import LLMProvider, OpenAIProvider, AzureOpenAIProvider, ClaudeProvider, GeminiProvider, LLMProviderFactory
 
 
 class TestLLMProvider:

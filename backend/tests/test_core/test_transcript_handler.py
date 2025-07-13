@@ -5,7 +5,7 @@ Unit tests for Transcript Handler (F02, F03)
 import pytest
 from unittest.mock import patch, Mock
 from youtube_transcript_api._errors import TranscriptsDisabled, NoTranscriptFound, VideoUnavailable
-from src.transcript_handler import list_transcript_languages, fetch_transcript, clean_transcript_text
+from backend.src.core.transcript_handler import list_transcript_languages, fetch_transcript, clean_transcript_text
 
 
 class TestListTranscriptLanguages:

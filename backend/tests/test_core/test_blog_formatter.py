@@ -6,7 +6,7 @@ import pytest
 import tempfile
 import os
 from unittest.mock import patch, mock_open
-from src.blog_formatter import format_as_blog, save_blog_to_file, create_blog_summary, validate_markdown
+from backend.src.core.blog_formatter import format_as_blog, save_blog_to_file, create_blog_summary, validate_markdown
 
 
 class TestFormatAsBlog:
